@@ -19,7 +19,7 @@ foreach ($abi in $hashes.Keys) {
     $url = "https://github.com/osfans/trime/releases/download/$release/$name"
     $apk = Join-Path $CacheDir $name
     if (!(Test-Path $apk)) {
-        & curl.exe --fail --location --retry 3 --connect-timeout 30 --output "$apk.part" $url
+        & curl.exe --fail --location --retry 3 --connect-timeout 30 --max-time 600 --output "$apk.part" $url
         if ($LASTEXITCODE -ne 0) { throw "Download failed: $url" }
         Move-Item -LiteralPath "$apk.part" -Destination $apk
     }
@@ -32,7 +32,7 @@ foreach ($abi in $hashes.Keys) {
             $relative = $null
             if ($entry.FullName -match "^lib/$abi/([^/]+\.so)$") {
                 $relative = "jniLibs/$abi/$($Matches[1])"
-            } elseif ($abi -eq 'arm64-v8a' -and $entry.FullName -match '^assets/shared/opencc/([^/]+)$') {
+            } elseif ($abi -eq 'arm64-v8a' -and $entry.FullName.StartsWith('assets/shared/') -and !$entry.FullName.EndsWith('/')) {
                 $relative = $entry.FullName
             }
             if ($relative) {
@@ -48,4 +48,8 @@ foreach ($abi in $hashes.Keys) {
 }
 [ordered]@{ release = $release; upstreamCommit = 'e09ac711'; sources = $records } |
     ConvertTo-Json -Depth 8 | Set-Content -Encoding utf8 "$OutputDir/provenance.json"
-Write-Host "Verified official native libraries and OpenCC fallback: $OutputDir"
+$defaultYaml = Join-Path $OutputDir 'assets/shared/default.yaml'
+if (!(Test-Path $defaultYaml) -or (Get-Content $defaultYaml -Raw).Trim().StartsWith('../../../../data/rime/')) {
+    throw 'Official default.yaml fallback missing or invalid'
+}
+Write-Host "Verified official native libraries and complete shared asset fallback: $OutputDir"

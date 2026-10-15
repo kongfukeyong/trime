@@ -25,7 +25,7 @@ try {
         $proxyUri = [Uri]$ProxyUrl
         $proxyArgs = @("-Dhttps.proxyHost=$($proxyUri.Host)", "-Dhttps.proxyPort=$($proxyUri.Port)", "-Dhttp.proxyHost=$($proxyUri.Host)", "-Dhttp.proxyPort=$($proxyUri.Port)")
     }
-    & $Gradle @tasks @proxyArgs '-PmvpPrebuiltDir=app/build/mvp-prebuilt' '-PbuildABI=arm64-v8a,x86_64' '-PbuildVersionName=v3.3.12-mvp' '--console=plain' '--max-workers=4' 2>&1 | Tee-Object "$OutputDir/build-mvp.log"
+    & $Gradle @tasks @proxyArgs '-PmvpPrebuiltDir=app/build/mvp-prebuilt' '-PbuildABI=arm64-v8a,x86_64' '-PbuildVersionName=v3.3.12-mvp' '--console=plain' '--max-workers=4' '-Dorg.gradle.internal.http.socketTimeout=30000' '-Dorg.gradle.internal.http.connectionTimeout=30000' 2>&1 | Tee-Object "$OutputDir/build-mvp.log"
     if ($LASTEXITCODE -ne 0) { throw "Gradle failed: $LASTEXITCODE (see build-mvp.log)" }
     $apks = @(Get-ChildItem 'app/build/outputs/apk/debug' -Filter '*.apk')
     if ($apks.Count -ne 2) { throw "Expected two ABI APKs, got $($apks.Count)" }
@@ -35,6 +35,18 @@ try {
         $permissions = & "$env:ANDROID_HOME/build-tools/36.0.0/aapt.exe" dump permissions $apk.FullName
         if ($LASTEXITCODE -ne 0) { throw 'Cannot read APK permissions' }
         if ($permissions -match 'android.permission.INTERNET') { throw 'APK must not request INTERNET permission' }
+        $zip = [IO.Compression.ZipFile]::OpenRead($apk.FullName)
+        try {
+            $defaultEntry = $zip.GetEntry('assets/shared/default.yaml')
+            if (!$defaultEntry) { throw 'APK missing assets/shared/default.yaml' }
+            foreach ($entry in $zip.Entries) {
+                if ($entry.FullName.StartsWith('assets/shared/') -and ($entry.Length -lt 256 -or $entry -eq $defaultEntry) -and !$entry.FullName.EndsWith('/')) {
+                    $reader = [IO.StreamReader]::new($entry.Open())
+                    try { $text = $reader.ReadToEnd() } finally { $reader.Dispose() }
+                    if ($text.Trim().StartsWith('../../../../data/rime/')) { throw "APK contains symlink placeholder: $($entry.FullName)" }
+                }
+            }
+        } finally { $zip.Dispose() }
         Copy-Item -LiteralPath $apk.FullName -Destination $OutputDir
     }
     Get-ChildItem $OutputDir -Filter '*.apk' | Get-FileHash -Algorithm SHA256 | Format-Table -AutoSize | Out-String -Width 300 | Set-Content "$OutputDir/apk-sha256.txt"

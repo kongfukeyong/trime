@@ -3,7 +3,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 name: Commit
-on: [push]
+on:
+  push:
+    branches-ignore: ['mvp/**'] # Dedicated MVP job uses verified native libraries.
 
 env:
   CI_NAME: Commit CI

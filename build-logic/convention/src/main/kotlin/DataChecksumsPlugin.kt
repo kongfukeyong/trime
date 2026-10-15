@@ -44,12 +44,29 @@ class DataChecksumsPlugin : Plugin<Project> {
         if (target.mvpPrebuiltDir != null) {
             val staged = target.layout.buildDirectory.dir("generated/mvpAssets")
             val stageTask = target.tasks.register<Sync>("stageMvpAssets") {
+                // Windows/archive checkouts may contain symlink target text instead
+                // of the linked Rime data. Real project resources override fallback.
+                from(target.assetsDir) {
+                    exclude {
+                        it.file.isFile && it.file.length() < 256 &&
+                            it.file.readText().trim().startsWith("../../../../data/rime/")
+                    }
+                }
                 from(target.mvpPrebuiltDir!!.resolve("assets"))
-                from(target.assetsDir)
                 exclude(FILE_NAME)
                 into(staged)
-                // Project assets take precedence over the official OpenCC fallback.
-                duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.INCLUDE
+                duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.EXCLUDE
+                doLast {
+                    val defaultYaml = staged.get().file("shared/default.yaml").asFile
+                    require(defaultYaml.isFile && !defaultYaml.readText().trim().startsWith("../../../../data/rime/")) {
+                        "MVP assets must contain a real shared/default.yaml"
+                    }
+                    staged.get().asFile.walkTopDown().filter { it.isFile && it.length() < 256 }.forEach {
+                        require(!it.readText().trim().startsWith("../../../../data/rime/")) {
+                            "Unresolved Rime symlink placeholder: $it"
+                        }
+                    }
+                }
             }
             target.extensions.configure<CommonExtension> {
                 sourceSets.getByName("main").assets.setSrcDirs(listOf(staged))
