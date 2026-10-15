@@ -1,6 +1,6 @@
 # 相对 Trime v3.3.12 的改动文件
 
-功能说明见 [MVP.md](MVP.md)。以下为已提交实现清单（不包含本目录清单自身）；生成的万象资源不提交 Git，详见资源 manifest。Rime/JNI C++ 没有修改。
+功能说明见 [MVP.md](MVP.md)。生成的万象资源不提交 Git，详见资源 manifest。Rime/JNI C++ 没有修改。四个上游测试文件仅修复当前 Kotlin/API 兼容性，保持原断言目的。
 
 ```text
 M	.github/workflows/commit-ci.yml
@@ -17,12 +17,18 @@ A	app/src/main/java/com/osfans/trime/ime/language/RuleBasedPredictor.kt
 M	app/src/main/java/com/osfans/trime/ime/switches/SwitchOptionWindow.kt
 A	app/src/main/res/values-zh-rCN/language_mvp.xml
 A	app/src/main/res/values/language_mvp.xml
+M	app/src/test/java/com/osfans/trime/data/sync/AtomicLocalFileCopyTest.kt
+M	app/src/test/java/com/osfans/trime/data/sync/OrphanCleanerTest.kt
+M	app/src/test/java/com/osfans/trime/data/sync/SyncRelativePathTest.kt
+M	app/src/test/java/com/osfans/trime/data/theme/GeneralStyleTest.kt
 A	app/src/test/java/com/osfans/trime/ime/language/LanguageSwitchPolicyTest.kt
 M	build-logic/convention/src/main/kotlin/DataChecksumsPlugin.kt
 M	build-logic/convention/src/main/kotlin/NativeAppConventionPlugin.kt
 M	build-logic/convention/src/main/kotlin/NativeBaseConventionPlugin.kt
 M	build-logic/convention/src/main/kotlin/OpenCCDataPlugin.kt
 M	build-logic/convention/src/main/kotlin/ProjectExtensions.kt
+A	docs/CHANGED-FILES.md
+A	docs/DIRECTORY-TREE.txt
 A	docs/MVP.md
 A	docs/build-mvp.md
 A	docs/wanxiang-assets.manifest.json
@@ -40,5 +46,7 @@ A	scripts/qa/build-editor.py
 A	scripts/qa/editor/AndroidManifest.xml
 A	scripts/qa/editor/MainActivity.java
 A	scripts/qa/emulator-smoke.py
+A	scripts/verify-mvp-apks.ps1
 A	scripts/verify-wanxiang.py
+A	docs/VALIDATION.md
 ```

@@ -6,6 +6,7 @@
 - [完整设计、代码、按键接入位置、手动验收与临时方案说明](docs/MVP.md)
 - [编译和安装步骤、工具链与原生库来源](docs/build-mvp.md)
 - [万象方案、词库、长句模型、许可证及固定校验和](docs/wanxiang-mvp.md)
+- [实际交付验证记录](docs/VALIDATION.md)
 - [GitHub 构建记录](https://github.com/kongfukeyong/trime/actions/workflows/mvp-build.yml)
 
 键盘顶部提供 **自动 / 强制中文 / 强制英文**。自动模式读取光标前 128 个字符；正在拼音组合时保持中文，已提交英文后缀倾向英文。手动选择优先并保存在本地。它是可替换的规则基线，尚不具备下一词的语义预测能力。

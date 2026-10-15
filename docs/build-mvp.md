@@ -76,8 +76,23 @@ Windows 使用 `./gradlew.bat`，并确保 OpenCC 脚本调用的 `python3` 可�
 
 ## 验证记录与产物
 
-截至 2026-10-15，本地已完成官方双 ABI SHA/签名验证、全 shared fallback 提取、build-logic 与 codegen 编译，以及实际 `stageMvpAssets` / `generateDataChecksums` / `mergeDebugAssets`。独立复核确认 14 个占位均替换为官方真实数据、68 个万象资源 SHA 一致、114 个暂存文件与 checksums.json 一致，且没有四层路径占位；报告为 outputs/stage-validation.json。`shared/default.yaml` SHA-256 为 `dd55653a991f9418eb425ee2112666f82e3e753c5ce3ed5702dd243041a45382`。完整 assemble/test 与最终 APK 验证仍在进行中，以构建日志与随后更新的记录为准。
+2026-10-15 09:07（Asia/Shanghai），本地 `build-mvp.ps1 -RunTests` 完成并退出 0，Gradle 输出 `BUILD SUCCESSFUL in 1m 19s`，59 个任务中 17 个实际执行、42 个复用缓存。主代码 Kotlin/Java 编译、双 ABI 打包及完整 JVM 单元测试均通过：**9 个测试类、44 项测试、0 失败、0 错误、0 跳过**，包含 `LanguageSwitchPolicyTest` 的 9 项语言切换用例。详见 outputs/unit-test-summary.json 和 app/build/reports/tests/testDebugUnitTest/。
 
-构建脚本成功后，outputs 应包含两个 debug APK、`build-mvp.log`、`apk-sha256.txt`、`native-provenance.json`。仅在 Gradle、签名、zipalign、权限、原生库字节 SHA 与占位检测全部成功后复制 APK。测试报告在 `app/build/reports/tests/testDebugUnitTest/`。本机过程状态另外写入仓库同级 `work/build-status.txt`。
+此前一次命令已产出 APK，但因上游四个旧测试文件的 Kotlin 兼容/API 失配导致整体失败；主代理/测试代理修复后才取得上述成功结果。原失败日志保存在 outputs/build-mvp-before-test-fix.log，没有将失败命令当作测试通过。
+
+本次基于共享工作目录构建。生成的 `BuildConfig.BUILD_COMMIT_HASH` 为 `e5920554d89d428d414266764741eb966ad31551`（配置时读取）；构建结束时主代理已将工作目录改动提交为 `1e7f839914da20b559172992cb8a89483f85f1b2`。因此不要将本机 APK 说成对 `1e7f839` 的干净检出重建；该提交的云构建由主代理另行追踪。
+
+实际 `stageMvpAssets` / `generateDataChecksums` / `mergeDebugAssets` 已通过。独立复核确认 14 个路径占位均替换为官方真实数据、68 个万象资源 SHA 一致、114 个暂存文件与 checksums.json 一致，且没有四层路径占位；报告为 outputs/stage-validation.json。`shared/default.yaml` SHA-256 为 `dd55653a991f9418eb425ee2112666f82e3e753c5ce3ed5702dd243041a45382`。CI 的 dangling symlink 也由 staging 显式排除，再使用官方 fallback；本机此次验证的是 Windows 路径文本占位形态。
+
+最终 APK 均为 `com.osfans.trime.debug`，版本名 3.3.12、版本号 20260901、最低 SDK21。以下文件已复制至仓库同级 outputs：
+
+| 文件 | 大小（字节） | SHA-256 |
+| --- | ---: | --- |
+| com.osfans.trime-v3.3.12-mvp-arm64-v8a-debug.apk | 410129863 | `13416938830bfd8f3cf1536cbf41f35bc1f2fdd52db24b2d5fb34c3ff1c7b941` |
+| com.osfans.trime-v3.3.12-mvp-x86_64-debug.apk | 410209571 | `7d21c4bed30db489a35766893fcdaeee154d09531812dd8bc30529cd840b89de` |
+
+两个 APK 的 apksigner v1/v2 签名验证、zipalign、原生 `.so` 与官方提取文件 SHA 一致性、全部 68 个万象文件 SHA、114 个 assets 校验项及真实 default.yaml 检查均通过。无 INTERNET 权限；保留上游依赖合并的 ACCESS_NETWORK_STATE（仅查询网络状态）。本机 debug 签名证书 SHA-256 为 `d3e2d64b928983f82cfa9eba768eeabd6b99d7f908fd1209b211b8e5fca185ba`。这些是可供安装验证的已签名 APK，不代表已在 Android 上成功安装/运行。
+
+outputs 包含两个 debug APK、`build-mvp.log`、`apk-sha256.txt`、`native-provenance.json`、`apk-validation.json`、`stage-validation.json` 与 `unit-test-summary.json`。构建脚本仅在 Gradle 与所有 APK 静态校验成功后复制两个 APK。已有 APK 可单独调用 `./scripts/verify-mvp-apks.ps1 -AndroidSdk $env:ANDROID_HOME -OutputDir ../outputs` 校验，无需重跑 Gradle（apksigner 仍需 JAVA_HOME）。本机过程状态另外写入仓库同级 `work/build-status.txt`。
 
 `adb devices -l` 当前为空。仅发现 Wear OS AVD 配置，没有可用的已运行手机模拟器；没有安装或启动本次 APK，也没有验证系统 IME 切换、实际 Rime 部署、候选上屏、隐私输入或目标设备兼容性。取得 APK 后仍需真机/手机模拟器端到端验证。

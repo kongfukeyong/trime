@@ -1,5 +1,5 @@
 trime/
-(Tracked source and generated Wanxiang assets; build caches and .git are excluded.)
+(Tracked source and generated Wanxiang assets; build caches and .git are excluded. Git submodules are shown at their pinned roots.)
 ├── .github/
 │   ├── ISSUE_TEMPLATE/
 │   │   ├── bug_report.yaml
@@ -637,6 +637,7 @@ trime/
 │   ├── CHANGED-FILES.md
 │   ├── DIRECTORY-TREE.txt
 │   ├── MVP.md
+│   ├── VALIDATION.md
 │   ├── build-mvp.md
 │   ├── wanxiang-assets.manifest.json
 │   ├── wanxiang-mvp.md
@@ -677,6 +678,7 @@ trime/
 │   ├── download-wanxiang.py
 │   ├── import-wanxiang.py
 │   ├── prepare-mvp-native.ps1
+│   ├── verify-mvp-apks.ps1
 │   └── verify-wanxiang.py
 ├── .clang-format
 ├── .editorconfig
