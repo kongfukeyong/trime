@@ -11,7 +11,7 @@
 - 93 项静态引用检查通过；字典文本合计 2,649,009 条记录（含反查、字符集及中英混合，不表示去重后的中文词数）。
 - 原始资源缓存保留在工作区 `work/wanxiang-source/`，本地可打包资产已生成到 `app/src/main/assets/rime/`。
 - 主代理将生成资产目录加入 `.gitignore`，避免把近 492 MB 数据直接推送到 Git；CI 在构建前按 lock 下载、导入及校验，再打入 APK。固定资源清单、导入/校验脚本、许可证下载来源和文档应跟随源码提交。
-- 尚未完成的验收：真实 Android 上的首次部署、长句输入、耗时/内存测试，以及最终 APK 内容核对。本报告不声称这些已通过。
+- 已完成两个最终 APK 的资源 SHA 核对，以及全新 API 35 x86_64 Android 模拟器的首次部署、编译产物和部署模型 SHA 验证。证据见 [VALIDATION.md](VALIDATION.md)。长句质量、内存基准和 ARM 真机兼容性尚未验收。
 
 ## 版本、来源与许可证
 
@@ -39,7 +39,7 @@
 
 万象基础方案使用 Rime `script_translator`、现有 Lua 插件与 octagram 的 `.gram` 文件。已检查模型二进制文件头为 `Rime::Grammar/1.0`，与固定 octagram 提交的 `src/gram_db.cc` 中 `kGrammarFormat` 一致。`grammar/language: wanxiang-lts-zh-hans` 精确对应模型文件名。上游 `translator/contextual_suggestions: false` 予以保留：这不关闭输入中整句组词使用的 grammar，而是关闭跨次输入的 contextual suggestions。当前未启用另一个需要独立预测数据的 predict 方案。
 
-词库包含带声调拼音，采用包内 `wanxiang_algebra:/base/全拼` 转写；默认支持全拼和简拼。原始词库、Lua、主方案和模型内容不修改。兼容性依据为版本、组件和配置静态核对，**不等同于目标 Android 设备上的部署及长句输入验收通过**。
+词库包含带声调拼音，采用包内 `wanxiang_algebra:/base/全拼` 转写；默认支持全拼和简拼。原始词库、Lua、主方案和模型内容不修改。兼容依据包括版本、组件和配置静态核对，以及 API 35 x86_64 模拟器的实际部署通过；这不等同于所有目标设备或长句质量验收通过。
 
 ## 为什么使用 assets/rime
 

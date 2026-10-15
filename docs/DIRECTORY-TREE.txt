@@ -668,6 +668,9 @@ trime/
 │   └── clang-format.sh
 ├── scripts/
 │   ├── qa/
+│   │   ├── automation/
+│   │   │   ├── AndroidManifest.xml
+│   │   │   └── DumpInstrumentation.java
 │   │   ├── editor/
 │   │   │   ├── AndroidManifest.xml
 │   │   │   └── MainActivity.java

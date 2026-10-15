@@ -91,6 +91,8 @@ postInputJob {
 
 编辑器中的周边文字属于 Android `InputConnection`，无法通过 Rime JNI 获取；JNI 提供的是引擎内部的拼音输入、候选与选项。这两个来源必须分开，才能保护尚未上屏的拼音。
 
+首次部署时，Android 可能在资源复制和 Rime 初始化完成前请求键盘。`onCreateInputView()` 通过 `runOnReady` 异步等待后创建视图，并补发当前编辑器状态，避免提前加载主题引发崩溃；等待期间不占据编辑器触摸区域。
+
 ## 编译与安装
 
 具体工具链版本、预编译原生库准备步骤、Gradle 命令见 [build-mvp.md](build-mvp.md)。万象来源、许可证、固定版本、校验和与部署目录见 [wanxiang-mvp.md](wanxiang-mvp.md)。

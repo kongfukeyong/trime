@@ -84,6 +84,7 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private lateinit var contentView: FrameLayout
     private lateinit var lastKnownConfig: Configuration
     private var inputView: InputView? = null
+    private var inputViewInitJob: Job? = null
     private var candidatesView: CandidatesView? = null
     private val navBarManager = NavigationBarManager()
     private val inputDeviceManager = InputDeviceManager { useVirtualKeyboard, useCandidatesView ->
@@ -382,7 +383,11 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 }
             is RimeMessage.DeployMessage -> {
                 if (it.data == RimeMessage.DeployMessage.State.Success) {
-                    ThemeManager.selectTheme(ThemeManager.prefs.selectedTheme.getValue())
+                    lifecycleScope.launch {
+                        rime.runOnReady {
+                            ThemeManager.selectTheme(ThemeManager.prefs.selectedTheme.getValue())
+                        }
+                    }
                 }
             }
             else -> {}
@@ -415,10 +420,11 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         navBarManager.evaluate(window.window!!, inputDeviceManager.useVirtualKeyboard)
         replaceInputView(theme)
         replaceCandidateView(theme)
-        inputView?.updateEnterKeyLabel(currentInputEditorInfo)
+        currentInputEditorInfo?.let { inputView?.updateEnterKeyLabel(it) }
     }
 
     override fun onDestroy() {
+        inputViewInitJob?.cancel()
         InputFeedbackManager.destroy()
         inputView = null
         recreateInputViewPrefs.forEach {
@@ -577,6 +583,14 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private val inputViewLocation = intArrayOf(0, 0)
 
     override fun onComputeInsets(outInsets: Insets) {
+        if (inputView == null) {
+            // First-run resource copying/deployment must not cover the editor.
+            outInsets.contentTopInsets = decorView.height
+            outInsets.visibleTopInsets = decorView.height
+            outInsets.touchableInsets = Insets.TOUCHABLE_INSETS_REGION
+            outInsets.touchableRegion.setEmpty()
+            return
+        }
         if (inputDeviceManager.useVirtualKeyboard) {
             inputView?.keyboardView?.getLocationInWindow(inputViewLocation)
             outInsets.apply {
@@ -603,8 +617,24 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
 
     override fun onCreateInputView(): View? {
         Timber.d("onCreateInputView")
-        replaceInputViews(ThemeManager.activeTheme)
-        // We will call `setInputView` by ourselves. This is fine.
+        inputViewInitJob?.cancel()
+        inputViewInitJob = lifecycleScope.launch {
+            // Android can request the keyboard before the bundled resources have
+            // been copied and Rime has deployed them. Never load a theme early.
+            rime.runOnReady {
+                ThemeManager.init(resources.configuration)
+                replaceInputViews(ThemeManager.activeTheme)
+                // onStartInputView may already have run while we were waiting.
+                // Read the current editor here, not the editor that requested us.
+                currentInputEditorInfo?.let { info ->
+                    if (isInputViewShown && inputDeviceManager.useVirtualKeyboard) {
+                        inputView?.startInput(info, restarting = true)
+                    }
+                }
+                postInputJob { prepareLanguageForKey(this) }
+            }
+        }
+        // The ready callback installs the view without blocking the main thread.
         return null
     }
 

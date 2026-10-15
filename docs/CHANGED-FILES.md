@@ -30,6 +30,7 @@ M	build-logic/convention/src/main/kotlin/ProjectExtensions.kt
 A	docs/CHANGED-FILES.md
 A	docs/DIRECTORY-TREE.txt
 A	docs/MVP.md
+A	docs/VALIDATION.md
 A	docs/build-mvp.md
 A	docs/wanxiang-assets.manifest.json
 A	docs/wanxiang-mvp.md
@@ -42,11 +43,12 @@ A	scripts/download-wanxiang.py
 A	scripts/import-wanxiang.py
 A	scripts/prepare-mvp-native.ps1
 A	scripts/qa/README.md
+A	scripts/qa/automation/AndroidManifest.xml
+A	scripts/qa/automation/DumpInstrumentation.java
 A	scripts/qa/build-editor.py
 A	scripts/qa/editor/AndroidManifest.xml
 A	scripts/qa/editor/MainActivity.java
 A	scripts/qa/emulator-smoke.py
 A	scripts/verify-mvp-apks.ps1
 A	scripts/verify-wanxiang.py
-A	docs/VALIDATION.md
 ```

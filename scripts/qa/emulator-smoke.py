@@ -16,7 +16,7 @@ EDITOR = 'local.trime.qa.editor'
 AUTOMATION = 'local.trime.qa.automation'
 IME = PACKAGE + '/com.osfans.trime.ime.core.TrimeInputMethodService'
 CASES = ['install', 'launch', 'enable-ime', 'first-run-storage', 'wanxiang-deployment', 'mode-bar',
-         'auto-pinyin', 'auto-english', 'force-chinese', 'force-english']
+         'auto-pinyin', 'auto-english', 'force-chinese', 'force-english', 'no-crash']
 
 
 def select_apk(path):
@@ -91,6 +91,10 @@ class Smoke:
         deadline = time.monotonic()+seconds
         last = None
         while time.monotonic() < deadline:
+            log_file = self.out/'logcat.txt'
+            if log_file.exists() and re.search(r'AndroidRuntime: Process: com\.osfans\.trime\.debug,',
+                                               log_file.read_text(encoding='utf-8',errors='replace')):
+                raise ValueError('Trime crashed; see logcat.txt and crashes.txt')
             try:
                 value = predicate()
                 if value:
@@ -299,6 +303,12 @@ class Smoke:
                 except Exception:
                     # Isolated cases reset content/mode. Continue collecting failures.
                     pass
+            def no_crash():
+                crash_log = self.adb('logcat','-b','crash','-d')
+                if PACKAGE in crash_log:
+                    raise RuntimeError('Product crash buffer is not empty')
+                return {'product_crash_buffer_empty': True}
+            self.case('no-crash',no_crash)
         except Exception:
             (self.out/'fatal-error.txt').write_text(traceback.format_exc(),encoding='utf-8')
         finally:
