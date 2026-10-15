@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "reference_checks": 93,
+  "manifest_files": 68,
+  "packaged_bytes": 492043713,
+  "dictionary_entries": {
+    "dicts/base.dict.yaml": 849015,
+    "dicts/chars.dict.yaml": 51031,
+    "dicts/cn&en.dict.yaml": 1848,
+    "dicts/compatible.dict.yaml": 5222,
+    "dicts/corrections.dict.yaml": 142,
+    "dicts/correlation.dict.yaml": 705825,
+    "dicts/en.dict.yaml": 51815,
+    "dicts/place.dict.yaml": 40381,
+    "dicts/poetry.dict.yaml": 327536,
+    "dicts/suggestion.dict.yaml": 347630,
+    "wanxiang.dict.yaml": 0,
+    "wanxiang_charset.dict.yaml": 8125,
+    "wanxiang_mixedcode.dict.yaml": 0,
+    "wanxiang_reverse.dict.yaml": 260439
+  },
+  "errors": [],
+  "scope": "Static dependency, hash and source audit only; Android deployment/runtime not tested here."
+}

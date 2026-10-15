@@ -34,8 +34,8 @@ class NativeAppConventionPlugin : NativeBaseConventionPlugin() {
                 }
             }
             defaultConfig {
-                buildConfigField("String", "LIBRIME_VERSION", "\"${target.librimeVersion}\"")
-                buildConfigField("String", "OPENCC_VERSION", "\"${target.openccVersion}\"")
+                buildConfigField("String", "LIBRIME_VERSION", "\"${if (target.mvpPrebuiltDir != null) "official-trime-v3.3.12" else target.librimeVersion}\"")
+                buildConfigField("String", "OPENCC_VERSION", "\"${if (target.mvpPrebuiltDir != null) "official-trime-v3.3.12" else target.openccVersion}\"")
             }
         }
     }

@@ -148,6 +148,10 @@ class CommonKeyboardActionListener {
 
             private fun handleSwitchCharset(action: KeyAction) {
                 val option = action.toggle.ifEmpty { return }
+                if (option == "ascii_mode") {
+                    service.toggleManualLanguage()
+                    return
+                }
 
                 rime.launchOnReady { api ->
                     service.lifecycleScope.launch {
@@ -385,18 +389,21 @@ class CommonKeyboardActionListener {
                     metaState
                 }
                 val modifiers = KeyModifiers.fromMetaState(m).modifiers
-                service.postRimeJob {
+                service.postInputJob {
                     if (service.hookKeyboard(keyEventCode, m)) {
                         Timber.d("handleKey: hook")
-                        return@postRimeJob
+                        return@postInputJob
+                    }
+                    if (m and (KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON or KeyEvent.META_META_ON) == 0) {
+                        if (!service.prepareLanguageForKey(this)) return@postInputJob
                     }
                     if (processKey(value, modifiers)) {
                         Timber.d("handleKey: processKey")
-                        return@postRimeJob
+                        return@postInputJob
                     }
                     if (AppUtils.launchKeyCategory(service, keyEventCode)) {
                         Timber.d("handleKey: openCategory")
-                        return@postRimeJob
+                        return@postInputJob
                     }
                     // other special cases
                     if (keyEventCode == KeyEvent.KEYCODE_BACK) {
@@ -410,7 +417,7 @@ class CommonKeyboardActionListener {
                 Timber.d("onText: $input")
                 val status = rime.run { statusCached }
                 if (!input[0].isAsciiPrintable() && status.isComposing) {
-                    service.postRimeJob { commitComposition() }
+                    service.postInputJob { commitComposition() }
                 }
 
                 val escaped = input.replace("{}", "{braceleft}{braceright}")
@@ -421,13 +428,14 @@ class CommonKeyboardActionListener {
                         else -> escaped[i].toString()
                     }
 
-                    service.postRimeJob {
+                    service.postInputJob {
                         if (value.run { startsWith('{') && endsWith('}') }) {
                             val token = value.removeSurrounding("{", "}")
                             onAction(KeyActionManager.getAction(token))
                         } else if (!value[0].isAsciiPrintable()) {
                             service.commitText(value)
                         } else {
+                            if (!service.prepareLanguageForKey(this)) return@postInputJob
                             simulateKeySequence(value)
                         }
                     }

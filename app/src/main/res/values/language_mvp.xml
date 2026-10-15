@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="language_auto">Auto</string>
+    <string name="language_force_chinese">Chinese</string>
+    <string name="language_force_english">English</string>
+    <string name="language_current_mode">Selected: %1$s; input: %2$s</string>
+</resources>

@@ -28,6 +28,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.ExtractedTextRequest
 import android.view.inputmethod.InlineSuggestionsRequest
 import android.view.inputmethod.InlineSuggestionsResponse
+import android.view.inputmethod.InputConnection
 import android.widget.FrameLayout
 import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
@@ -49,6 +50,10 @@ import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.data.theme.ThemeManager
 import com.osfans.trime.ime.composition.CandidatesView
 import com.osfans.trime.ime.keyboard.InputFeedbackManager
+import com.osfans.trime.ime.language.InputLanguageMode
+import com.osfans.trime.ime.language.Language
+import com.osfans.trime.ime.language.LanguageSwitchPolicy
+import com.osfans.trime.ime.language.RuleBasedPredictor
 import com.osfans.trime.receiver.RimeIntentReceiver
 import com.osfans.trime.util.any
 import com.osfans.trime.util.findSectionFrom
@@ -57,10 +62,12 @@ import com.osfans.trime.util.monitorCursorAnchor
 import com.osfans.trime.util.styledFloat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import splitties.bitflags.hasFlag
 import splitties.systemservices.clipboardManager
 import splitties.systemservices.inputMethodManager
@@ -93,6 +100,106 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     private var lastCommittedText: String = ""
 
     private var composingText: String = ""
+
+    private val languagePrefs by lazy { getSharedPreferences("language_mvp", MODE_PRIVATE) }
+    private val languagePolicy = LanguageSwitchPolicy(RuleBasedPredictor())
+    @Volatile
+    var languageMode: InputLanguageMode = InputLanguageMode.AUTO
+        private set
+
+    // Jobs from a previous editor must not inspect or switch the new editor.
+    @Volatile
+    private var languageEditorGeneration = 0
+
+    private fun EditorInfo.requiresAsciiInput(): Boolean {
+        if (imeOptions.hasFlag(EditorInfo.IME_FLAG_FORCE_ASCII)) return true
+        return when (inputType and InputType.TYPE_MASK_CLASS) {
+            InputType.TYPE_CLASS_NUMBER, InputType.TYPE_CLASS_PHONE, InputType.TYPE_CLASS_DATETIME -> true
+            InputType.TYPE_CLASS_TEXT -> (inputType and InputType.TYPE_MASK_VARIATION) in setOf(
+                InputType.TYPE_TEXT_VARIATION_PASSWORD,
+                InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
+                InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD,
+                InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
+                InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
+            )
+            else -> false
+        }
+    }
+
+    private data class LanguageEditor(
+        val connection: InputConnection?,
+        val mode: InputLanguageMode,
+        val requiresAscii: Boolean,
+        val canReadContext: Boolean,
+    )
+
+    /** False means the editor changed during suspension; the caller must drop this key. */
+    suspend fun prepareLanguageForKey(api: RimeApi): Boolean {
+        val generation = languageEditorGeneration
+        val ascii = api.getRuntimeOption("ascii_mode")
+        val composing = api.statusCached.isComposing || api.getRawInput().isNotEmpty()
+        val editor = withContext(Dispatchers.Main.immediate) {
+            if (generation != languageEditorGeneration) return@withContext null
+            val info = currentInputEditorInfo ?: return@withContext null
+            LanguageEditor(
+                currentInputConnection,
+                languageMode,
+                info.requiresAsciiInput(),
+                info.inputType and InputType.TYPE_MASK_CLASS != InputType.TYPE_NULL,
+            )
+        } ?: return false
+        // InputConnection is a synchronous IPC. Keep slow editors off the keyboard UI thread.
+        val context = if (editor.mode == InputLanguageMode.AUTO && !composing &&
+            !editor.requiresAscii && editor.canReadContext
+        ) {
+            withContext(Dispatchers.IO) {
+                try {
+                    editor.connection?.getTextBeforeCursor(128, 0)?.toString()
+                } catch (_: RuntimeException) {
+                    null
+                }
+            }
+        } else {
+            null
+        }
+        if (generation != languageEditorGeneration) return false
+        // Respect password/numeric/email constraints without reading their surrounding text.
+        val target = if (editor.requiresAscii) Language.ENGLISH else languagePolicy.decide(
+            context, composing, editor.mode, if (ascii) Language.ENGLISH else Language.CHINESE,
+        )
+        val targetAscii = target == Language.ENGLISH
+        if (targetAscii != ascii) {
+            // Only an explicit override/editor constraint can reach English while composing.
+            if (targetAscii && composing) api.commitComposition()
+            if (generation != languageEditorGeneration) return false
+            api.setRuntimeOption("ascii_mode", targetAscii)
+        }
+        return generation == languageEditorGeneration
+    }
+
+    fun setLanguageMode(mode: InputLanguageMode) {
+        postInputJob { applyLanguageMode(this, mode) }
+    }
+
+    /** The existing keyboard's 中/英 key becomes a persistent manual override too. */
+    fun toggleManualLanguage() {
+        postInputJob {
+            val mode = if (getRuntimeOption("ascii_mode")) InputLanguageMode.FORCE_CHINESE else InputLanguageMode.FORCE_ENGLISH
+            applyLanguageMode(this, mode)
+        }
+    }
+
+    private suspend fun applyLanguageMode(api: RimeApi, mode: InputLanguageMode) {
+        val generation = languageEditorGeneration
+        withContext(Dispatchers.Main.immediate) {
+            if (generation != languageEditorGeneration) return@withContext
+            languageMode = mode
+            languagePrefs.edit().putString("mode", mode.name).apply()
+            inputView?.updateLanguageMode()
+        }
+        if (generation != languageEditorGeneration) return
+        prepareLanguageForKey(api)
+    }
 
     private var cursorUpdateIndex = 0
 
@@ -148,6 +255,14 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
      */
     fun postRimeJob(block: suspend RimeApi.() -> Unit) = postJob(rime.lifecycleScope) { rime.runOnReady(block) }
 
+    /** Bind input events to their editor when enqueued, not when they eventually execute. */
+    fun postInputJob(block: suspend RimeApi.() -> Unit): Job {
+        val generation = languageEditorGeneration
+        return postRimeJob {
+            if (generation == languageEditorGeneration) block()
+        }
+    }
+
     private suspend fun updateRimeOption(api: RimeApi) {
         try {
             api.setRuntimeOption("soft_cursor", prefs.keyboard.useSoftCursor.getValue()) // 軟光標
@@ -171,6 +286,9 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
     }
 
     override fun onCreate() {
+        languageMode = runCatching {
+            InputLanguageMode.valueOf(languagePrefs.getString("mode", InputLanguageMode.AUTO.name)!!)
+        }.getOrDefault(InputLanguageMode.AUTO)
         rime = RimeDaemon.createSession(javaClass.name)
         lifecycleScope.launch {
             jobs.consumeEach { it.join() }
@@ -513,14 +631,13 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         attribute: EditorInfo,
         restarting: Boolean,
     ) {
+        languageEditorGeneration += 1
         composingText = ""
         Timber.d("onStartInput: restarting=$restarting")
         val isNullType = attribute.inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_NULL
         postRimeJob {
-            if (restarting) {
-                // when input restarts in the same editor, clear previous composition
-                clearComposition()
-            }
+            // No previous editor's composition may leak into the newly focused editor.
+            clearComposition()
             setNullInputType(isNullType)
         }
     }
@@ -563,9 +680,11 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
                 candidatesView?.updateCursorAnchor(contentSize)
             }
         }
+        postInputJob { prepareLanguageForKey(this) }
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
+        languageEditorGeneration += 1
         Timber.d("onFinishInputView: finishingInput=$finishingInput")
         decorLocationUpdated = false
         inputView?.dismissCandidateActionMenu()
@@ -719,7 +838,10 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         val keyVal = KeyValue.fromKeyEvent(event)
         if (keyVal.value != RimeKeyMapping.RimeKey_VoidSymbol) {
             val modifiers = KeyModifiers.fromKeyEvent(event)
-            postRimeJob {
+            postInputJob {
+                if (!modifiers.release && !modifiers.ctrl && !modifiers.alt && !modifiers.meta) {
+                    if (!prepareLanguageForKey(this)) return@postInputJob
+                }
                 processKey(keyVal, modifiers, isVirtual = false)
             }
             return true

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="language_auto">自动</string>
+    <string name="language_force_chinese">强制中文</string>
+    <string name="language_force_english">强制英文</string>
+    <string name="language_current_mode">已选择：%1$s；当前输入：%2$s</string>
+</resources>

@@ -1,0 +1,59 @@
+name: Offline language MVP
+
+on:
+  push:
+    branches: [mvp/auto-language]
+    paths-ignore: ['docs/**', '*.md']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mvp-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: android-actions/setup-android@v3
+      - name: Install SDK and validation dependency
+        shell: pwsh
+        run: |
+          sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+          if ($LASTEXITCODE -ne 0) { throw 'SDK installation failed' }
+          python -m pip install 'PyYAML==6.0.3'
+      - name: Prepare pinned offline Wanxiang resources
+        shell: pwsh
+        run: |
+          python scripts/download-wanxiang.py
+          if ($LASTEXITCODE -ne 0) { throw 'Resource download failed' }
+          python scripts/import-wanxiang.py
+          if ($LASTEXITCODE -ne 0) { throw 'Resource import failed' }
+          python scripts/verify-wanxiang.py
+          if ($LASTEXITCODE -ne 0) { throw 'Resource validation failed' }
+      - name: Build, unit test and verify signed APKs
+        shell: pwsh
+        run: ./scripts/build-mvp.ps1 -JavaHome $env:JAVA_HOME -AndroidSdk $env:ANDROID_HOME -OutputDir outputs -RunTests
+      - name: Upload APKs and validation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trime-offline-language-mvp
+          path: |
+            outputs/
+            docs/wanxiang-validation.json
+            docs/wanxiang-assets.manifest.json
+            app/build/reports/tests/testDebugUnitTest/
+          if-no-files-found: warn
+          retention-days: 14

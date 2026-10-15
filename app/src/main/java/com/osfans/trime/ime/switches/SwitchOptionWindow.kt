@@ -21,6 +21,7 @@ import com.osfans.trime.data.theme.Theme
 import com.osfans.trime.ime.bar.ui.ToolButton
 import com.osfans.trime.ime.broadcast.InputBroadcastReceiver
 import com.osfans.trime.ime.core.TrimeInputMethodService
+import com.osfans.trime.ime.language.InputLanguageMode
 import com.osfans.trime.ime.dialog.EnabledSchemaPickerDialog
 import com.osfans.trime.ime.window.BoardWindow
 import com.osfans.trime.ui.main.settings.ThemePickerDialog
@@ -76,6 +77,10 @@ class SwitchOptionWindow :
     }
 
     private suspend fun RimeApi.applyOption(option: String, value: Boolean) {
+        if (option == "ascii_mode") {
+            service.setLanguageMode(if (value) InputLanguageMode.FORCE_ENGLISH else InputLanguageMode.FORCE_CHINESE)
+            return
+        }
         setRuntimeOption(option, value)
         if (option in saveOptions) {
             RimeConfig.openUserConfig("user").use {
@@ -125,6 +130,10 @@ class SwitchOptionWindow :
                     is SwitchOptionEntry.Custom -> {
                         val options = entry.switch.options
                         if (options.isEmpty()) {
+                            if (entry.switch.name == "ascii_mode") {
+                                service.toggleManualLanguage()
+                                return
+                            }
                             rime.launchOnReady {
                                 val oldValue = it.getRuntimeOption(entry.switch.name)
                                 it.applyOption(entry.switch.name, !oldValue)

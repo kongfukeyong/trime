@@ -31,6 +31,7 @@ import com.osfans.trime.ime.composition.PreeditDelegate
 import com.osfans.trime.ime.dependency.InputDependencyManager
 import com.osfans.trime.ime.keyboard.KeyboardPrefs.isLandscapeMode
 import com.osfans.trime.ime.keyboard.KeyboardWindow
+import com.osfans.trime.ime.language.LanguageModeBar
 import com.osfans.trime.ime.popup.PopupDelegate
 import com.osfans.trime.ime.symbol.LiquidWindow
 import com.osfans.trime.ime.window.BoardWindowManager
@@ -105,6 +106,12 @@ class InputView(
 
     private val candidatesMode by AppPrefs.defaultInstance().candidates.mode
 
+    private val languageModeBar = LanguageModeBar(themedContext, service::setLanguageMode)
+
+    fun updateLanguageMode() {
+        languageModeBar.update(service.languageMode, rime.run { statusCached.isAsciiMode })
+    }
+
     private val keyboardSidePadding = theme.generalStyle.keyboardPadding
     private val keyboardSidePaddingLandscape = theme.generalStyle.keyboardPaddingLand
     private val keyboardBottomPadding = theme.generalStyle.keyboardPaddingBottom
@@ -160,9 +167,16 @@ class InputView(
                     },
                 )
                 add(
+                    languageModeBar,
+                    lParams(matchParent, dp(48)) {
+                        topOfParent()
+                        centerHorizontally()
+                    },
+                )
+                add(
                     inputBar.view,
                     lParams(matchParent, dp(inputBar.themedHeight)) {
-                        topOfParent()
+                        below(languageModeBar)
                         centerHorizontally()
                     },
                 )
@@ -209,6 +223,7 @@ class InputView(
             }
 
         updateKeyboardSize()
+        updateLanguageMode()
 
         add(
             preedit.ui.root,
@@ -324,6 +339,7 @@ class InputView(
             else -> {}
         }
         broadcastKeyAppearanceUpdate()
+        updateLanguageMode()
     }
 
     fun updateSelection(

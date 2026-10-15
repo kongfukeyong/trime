@@ -28,6 +28,7 @@ class OpenCCDataPlugin : Plugin<Project> {
         get() = assetsDir.resolve("shared/opencc")
 
     override fun apply(target: Project) {
+        if (target.mvpPrebuiltDir != null) return
         registerInstallTask(target)
         registerCleanTask(target)
     }

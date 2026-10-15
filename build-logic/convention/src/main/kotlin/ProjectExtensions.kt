@@ -16,6 +16,7 @@ fun Project.runCmd(
 ): String {
     val output = providers.exec {
         commandLine = cmd.split(" ")
+        isIgnoreExitValue = true
     }
     return if (output.result.get().exitValue == 0) {
         output.standardOutput.asText.get().trim()
@@ -23,6 +24,10 @@ fun Project.runCmd(
         default
     }
 }
+
+// Explicit opt-in: regular builds continue to compile the native sources.
+val Project.mvpPrebuiltDir: File?
+    get() = providers.gradleProperty("mvpPrebuiltDir").orNull?.let { rootProject.file(it) }
 
 val Project.assetsDir: File
     get() = file("src/main/assets").also { it.mkdirs() }

@@ -11,6 +11,9 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.Delete
+import org.gradle.api.tasks.Sync
+import com.android.build.api.dsl.CommonExtension
+import org.gradle.kotlin.dsl.configure
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
@@ -38,6 +41,26 @@ class DataChecksumsPlugin : Plugin<Project> {
     }
 
     override fun apply(target: Project) {
+        if (target.mvpPrebuiltDir != null) {
+            val staged = target.layout.buildDirectory.dir("generated/mvpAssets")
+            val stageTask = target.tasks.register<Sync>("stageMvpAssets") {
+                from(target.mvpPrebuiltDir!!.resolve("assets"))
+                from(target.assetsDir)
+                exclude(FILE_NAME)
+                into(staged)
+                // Project assets take precedence over the official OpenCC fallback.
+                duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.INCLUDE
+            }
+            target.extensions.configure<CommonExtension> {
+                sourceSets.getByName("main").assets.setSrcDirs(listOf(staged))
+            }
+            target.tasks.register<DataChecksumsTask>(TASK) {
+                dependsOn(stageTask)
+                inputDir.set(staged)
+                outputFile.set(staged.map { it.file(FILE_NAME) })
+            }
+            return
+        }
         target.tasks.register<DataChecksumsTask>(TASK) {
             inputDir.set(target.assetsDir)
             outputFile.set(target.assetsDir.resolve(FILE_NAME))

@@ -26,7 +26,20 @@ open class NativeBaseConventionPlugin : Plugin<Project> {
             // Steps to generate the prebuilt directory:
             // $ ./gradlew app:assembleRelease
             // $ cp --recursive app/build/intermediates/stripped_native_libs/universalRelease/out/lib app/prebuilt
-            if (target.file("prebuilt").exists()) {
+            if (target.mvpPrebuiltDir != null) {
+                val prebuilt = target.mvpPrebuiltDir!!
+                val abis = target.buildAbiOverride?.split(",") ?: listOf("arm64-v8a", "x86_64")
+                require(prebuilt.resolve("provenance.json").isFile) {
+                    "Run scripts/prepare-mvp-native.ps1 before using -PmvpPrebuiltDir"
+                }
+                abis.forEach { abi ->
+                    require(prebuilt.resolve("jniLibs/$abi/librime_jni.so").isFile) {
+                        "Missing verified native library for $abi in $prebuilt"
+                    }
+                }
+                sourceSets.getByName("main").jniLibs.srcDirs(setOf(prebuilt.resolve("jniLibs")))
+                packaging.jniLibs.keepDebugSymbols += "**/*.so"
+            } else if (target.file("prebuilt").exists()) {
                 sourceSets.getByName("main").jniLibs.srcDirs(setOf("prebuilt"))
             } else {
                 externalNativeBuild.apply {
@@ -41,7 +54,8 @@ open class NativeBaseConventionPlugin : Plugin<Project> {
                 isEnable = true
                 isUniversalApk = false
                 reset()
-                (target.buildAbiOverride?.split(",") ?: Versions.supportedAbis).forEach {
+                (target.buildAbiOverride?.split(",")
+                    ?: if (target.mvpPrebuiltDir != null) listOf("arm64-v8a", "x86_64") else Versions.supportedAbis).forEach {
                     include(it)
                 }
             }
