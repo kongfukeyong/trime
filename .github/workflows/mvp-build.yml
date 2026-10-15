@@ -18,15 +18,15 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '21'
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - uses: android-actions/setup-android@v3
+      - uses: android-actions/setup-android@v4
       - name: Install SDK and validation dependency
         shell: pwsh
         run: |
@@ -47,7 +47,7 @@ jobs:
         run: ./scripts/build-mvp.ps1 -JavaHome $env:JAVA_HOME -AndroidSdk $env:ANDROID_HOME -OutputDir outputs -RunTests
       - name: Upload APKs and validation evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: trime-offline-language-mvp
           path: |

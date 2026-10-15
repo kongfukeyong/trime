@@ -12,6 +12,8 @@ $env:ANDROID_HOME = (Resolve-Path $AndroidSdk).Path
 $env:ANDROID_SDK_ROOT = $env:ANDROID_HOME
 $env:Path = "$env:JAVA_HOME/bin;$env:Path"
 if ($ProxyUrl) { $env:HTTPS_PROXY = $ProxyUrl }
+& python "$PSScriptRoot/verify-wanxiang.py"
+if ($LASTEXITCODE -ne 0) { throw 'Wanxiang resources missing or invalid; run download-wanxiang.py and import-wanxiang.py first' }
 & "$PSScriptRoot/prepare-mvp-native.ps1"
 if (!$?) { throw 'Native preparation failed' }
 New-Item -ItemType Directory -Force $OutputDir | Out-Null
