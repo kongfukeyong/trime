@@ -59,6 +59,7 @@ public class MainActivity extends Activity {
 
     private void addSeed(LinearLayout row, String label, final String text) {
         Button button = new Button(this);
+        button.setAllCaps(false);
         button.setText(label);
         button.setOnClickListener(v -> seed(text));
         row.addView(button, new LinearLayout.LayoutParams(0, -2, 1));

@@ -1,0 +1,704 @@
+trime/
+(Tracked source and generated Wanxiang assets; build caches and .git are excluded.)
+├── .github/
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.yaml
+│   │   ├── config.yml
+│   │   └── feature_request.yaml
+│   ├── workflows/
+│   │   ├── commit-ci.yml
+│   │   ├── mvp-build.yml
+│   │   ├── nightly-ci.yml
+│   │   ├── pull-request-ci.yml
+│   │   └── release-ci.yml
+│   ├── FUNDING.yml
+│   └── pull-request-template.md
+├── .idea/
+│   └── copyright/
+│       ├── SPDX.xml
+│       └── profiles_settings.xml
+├── app/
+│   ├── data/
+│   │   └── rime/
+│   │       ├── essay
+│   │       ├── luna-pinyin
+│   │       ├── prelude
+│   │       └── stroke
+│   ├── licenses/
+│   │   └── libraries/
+│   │       ├── boost.json
+│   │       ├── glog.json
+│   │       ├── leveldb.json
+│   │       ├── librime.json
+│   │       ├── marisa-trie.json
+│   │       ├── opencc.json
+│   │       └── yaml-cpp.json
+│   ├── schemas/
+│   │   └── com.osfans.trime.data.db.Database/
+│   │       └── 4.json
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── assets/
+│   │   │   │   ├── rime/
+│   │   │   │   │   ├── dicts/
+│   │   │   │   │   │   ├── base.dict.yaml
+│   │   │   │   │   │   ├── chars.dict.yaml
+│   │   │   │   │   │   ├── chengyu.txt
+│   │   │   │   │   │   ├── cn&en.dict.yaml
+│   │   │   │   │   │   ├── compatible.dict.yaml
+│   │   │   │   │   │   ├── corrections.dict.yaml
+│   │   │   │   │   │   ├── correlation.dict.yaml
+│   │   │   │   │   │   ├── en.dict.yaml
+│   │   │   │   │   │   ├── place.dict.yaml
+│   │   │   │   │   │   ├── poetry.dict.yaml
+│   │   │   │   │   │   └── suggestion.dict.yaml
+│   │   │   │   │   ├── licenses/
+│   │   │   │   │   │   ├── LICENSE
+│   │   │   │   │   │   ├── MODEL-LICENSE
+│   │   │   │   │   │   ├── OPENCC-LICENSE
+│   │   │   │   │   │   └── WANXIANG-NOTICE.txt
+│   │   │   │   │   ├── lua/
+│   │   │   │   │   │   ├── lib/
+│   │   │   │   │   │   │   ├── bit.lua
+│   │   │   │   │   │   │   └── userdb.lua
+│   │   │   │   │   │   ├── tips/
+│   │   │   │   │   │   │   └── tips_show.txt
+│   │   │   │   │   │   ├── backspace_limit.lua
+│   │   │   │   │   │   ├── chars_filter.lua
+│   │   │   │   │   │   ├── input_statistics.lua
+│   │   │   │   │   │   ├── key_binder.lua
+│   │   │   │   │   │   ├── librime.lua
+│   │   │   │   │   │   ├── limit_repeated.lua
+│   │   │   │   │   │   ├── number_translator.lua
+│   │   │   │   │   │   ├── quick_symbol_text.lua
+│   │   │   │   │   │   ├── select_character.lua
+│   │   │   │   │   │   ├── set_schema.lua
+│   │   │   │   │   │   ├── shijian.lua
+│   │   │   │   │   │   ├── super_calculator.lua
+│   │   │   │   │   │   ├── super_comment_preedit.lua
+│   │   │   │   │   │   ├── super_lookup.lua
+│   │   │   │   │   │   ├── super_segmentation.lua
+│   │   │   │   │   │   ├── super_sequence.lua
+│   │   │   │   │   │   ├── super_tips.lua
+│   │   │   │   │   │   ├── text_formatting_promote.lua
+│   │   │   │   │   │   ├── tone_fallback.lua
+│   │   │   │   │   │   ├── unicode.lua
+│   │   │   │   │   │   ├── version_display.lua
+│   │   │   │   │   │   └── wanxiang.lua
+│   │   │   │   │   ├── opencc/
+│   │   │   │   │   │   ├── HKVariants.txt
+│   │   │   │   │   │   ├── STCharacters.txt
+│   │   │   │   │   │   ├── STPhrases.txt
+│   │   │   │   │   │   ├── TWVariants.txt
+│   │   │   │   │   │   ├── chinese_english.json
+│   │   │   │   │   │   ├── chinese_english.txt
+│   │   │   │   │   │   ├── emoji.json
+│   │   │   │   │   │   ├── emoji.txt
+│   │   │   │   │   │   ├── english_chinese.txt
+│   │   │   │   │   │   ├── others.txt
+│   │   │   │   │   │   ├── s2hk.json
+│   │   │   │   │   │   ├── s2t.json
+│   │   │   │   │   │   └── s2tw.json
+│   │   │   │   │   ├── custom_phrase.txt
+│   │   │   │   │   ├── default.custom.yaml
+│   │   │   │   │   ├── default.yaml
+│   │   │   │   │   ├── version.txt
+│   │   │   │   │   ├── wanxiang-lts-zh-hans.gram
+│   │   │   │   │   ├── wanxiang.dict.yaml
+│   │   │   │   │   ├── wanxiang.schema.yaml
+│   │   │   │   │   ├── wanxiang_algebra.yaml
+│   │   │   │   │   ├── wanxiang_charset.dict.yaml
+│   │   │   │   │   ├── wanxiang_charset.schema.yaml
+│   │   │   │   │   ├── wanxiang_mixedcode.dict.yaml
+│   │   │   │   │   ├── wanxiang_mixedcode.schema.yaml
+│   │   │   │   │   ├── wanxiang_reverse.dict.yaml
+│   │   │   │   │   ├── wanxiang_reverse.schema.yaml
+│   │   │   │   │   └── wanxiang_symbols.yaml
+│   │   │   │   └── shared/
+│   │   │   │       ├── default.yaml
+│   │   │   │       ├── essay.txt
+│   │   │   │       ├── key_bindings.yaml
+│   │   │   │       ├── luna_pinyin.dict.yaml
+│   │   │   │       ├── luna_pinyin.schema.yaml
+│   │   │   │       ├── luna_pinyin_fluency.schema.yaml
+│   │   │   │       ├── luna_pinyin_simp.schema.yaml
+│   │   │   │       ├── luna_pinyin_tw.schema.yaml
+│   │   │   │       ├── luna_quanpin.schema.yaml
+│   │   │   │       ├── pinyin.yaml
+│   │   │   │       ├── punctuation.yaml
+│   │   │   │       ├── stroke.dict.yaml
+│   │   │   │       ├── stroke.schema.yaml
+│   │   │   │       ├── symbols.yaml
+│   │   │   │       ├── tongwenfeng.trime.yaml
+│   │   │   │       └── trime.yaml
+│   │   │   ├── java/
+│   │   │   │   └── com/
+│   │   │   │       └── osfans/
+│   │   │   │           └── trime/
+│   │   │   │               ├── core/
+│   │   │   │               │   ├── KeyModifier.kt
+│   │   │   │               │   ├── KeyValue.kt
+│   │   │   │               │   ├── Rime.kt
+│   │   │   │               │   ├── RimeApi.kt
+│   │   │   │               │   ├── RimeConfig.kt
+│   │   │   │               │   ├── RimeDispatcher.kt
+│   │   │   │               │   ├── RimeKeyEvent.kt
+│   │   │   │               │   ├── RimeLifecycle.kt
+│   │   │   │               │   ├── RimeMaintenanceMutex.kt
+│   │   │   │               │   ├── RimeMessage.kt
+│   │   │   │               │   ├── RimeProto.kt
+│   │   │   │               │   ├── RimeSchema.kt
+│   │   │   │               │   └── SchemaItem.kt
+│   │   │   │               ├── daemon/
+│   │   │   │               │   ├── Extensions.kt
+│   │   │   │               │   ├── RimeDaemon.kt
+│   │   │   │               │   └── RimeSession.kt
+│   │   │   │               ├── data/
+│   │   │   │               │   ├── base/
+│   │   │   │               │   │   ├── DataChecksums.kt
+│   │   │   │               │   │   ├── DataDiff.kt
+│   │   │   │               │   │   └── DataManager.kt
+│   │   │   │               │   ├── db/
+│   │   │   │               │   │   ├── ClipboardHelper.kt
+│   │   │   │               │   │   ├── CollectionHelper.kt
+│   │   │   │               │   │   ├── Database.kt
+│   │   │   │               │   │   ├── DatabaseBean.kt
+│   │   │   │               │   │   └── DatabaseDao.kt
+│   │   │   │               │   ├── opencc/
+│   │   │   │               │   │   ├── dict/
+│   │   │   │               │   │   │   ├── Dictionary.kt
+│   │   │   │               │   │   │   ├── OpenCCDictionary.kt
+│   │   │   │               │   │   │   └── TextDictionary.kt
+│   │   │   │               │   │   └── OpenCCDictManager.kt
+│   │   │   │               │   ├── prefs/
+│   │   │   │               │   │   ├── AppPrefs.kt
+│   │   │   │               │   │   ├── PreferenceDelegate.kt
+│   │   │   │               │   │   ├── PreferenceDelegateEnum.kt
+│   │   │   │               │   │   ├── PreferenceDelegateFragment.kt
+│   │   │   │               │   │   ├── PreferenceDelegateOwner.kt
+│   │   │   │               │   │   ├── PreferenceDelegateProvider.kt
+│   │   │   │               │   │   └── PreferenceDelegateUi.kt
+│   │   │   │               │   ├── soundeffect/
+│   │   │   │               │   │   ├── SoundEffect.kt
+│   │   │   │               │   │   └── SoundEffectManager.kt
+│   │   │   │               │   ├── sync/
+│   │   │   │               │   │   ├── AtomicLocalFileCopy.kt
+│   │   │   │               │   │   ├── AtomicSafFileCopy.kt
+│   │   │   │               │   │   ├── BoundedCopyPool.kt
+│   │   │   │               │   │   ├── DataStorageMode.kt
+│   │   │   │               │   │   ├── ExternalSyncFallback.kt
+│   │   │   │               │   │   ├── LocalDirectoryGate.kt
+│   │   │   │               │   │   ├── OrphanCleaner.kt
+│   │   │   │               │   │   ├── RimeDataSync.kt
+│   │   │   │               │   │   ├── SafDisplayPath.kt
+│   │   │   │               │   │   ├── SafPathCache.kt
+│   │   │   │               │   │   ├── SafQueryException.kt
+│   │   │   │               │   │   ├── SafTreeWalker.kt
+│   │   │   │               │   │   ├── SyncIndex.kt
+│   │   │   │               │   │   ├── SyncRelativePath.kt
+│   │   │   │               │   │   └── UserDbMigration.kt
+│   │   │   │               │   ├── theme/
+│   │   │   │               │   │   ├── model/
+│   │   │   │               │   │   │   ├── ColorScheme.kt
+│   │   │   │               │   │   │   ├── GeneralStyle.kt
+│   │   │   │               │   │   │   ├── KeyActionToken.kt
+│   │   │   │               │   │   │   ├── LiquidKeyboard.kt
+│   │   │   │               │   │   │   ├── Preedit.kt
+│   │   │   │               │   │   │   ├── PresetKey.kt
+│   │   │   │               │   │   │   ├── TextKeyboard.kt
+│   │   │   │               │   │   │   ├── ToolBar.kt
+│   │   │   │               │   │   │   └── Window.kt
+│   │   │   │               │   │   ├── ColorManager.kt
+│   │   │   │               │   │   ├── FontManager.kt
+│   │   │   │               │   │   ├── KeyActionManager.kt
+│   │   │   │               │   │   ├── Theme.kt
+│   │   │   │               │   │   ├── ThemeFilesManager.kt
+│   │   │   │               │   │   ├── ThemeItem.kt
+│   │   │   │               │   │   ├── ThemeManager.kt
+│   │   │   │               │   │   └── ThemePrefs.kt
+│   │   │   │               │   ├── userdict/
+│   │   │   │               │   │   └── UserDictManager.kt
+│   │   │   │               │   └── SymbolHistory.kt
+│   │   │   │               ├── ime/
+│   │   │   │               │   ├── bar/
+│   │   │   │               │   │   ├── ui/
+│   │   │   │               │   │   │   ├── AlwaysUi.kt
+│   │   │   │               │   │   │   ├── ButtonsBarUi.kt
+│   │   │   │               │   │   │   ├── CandidateUi.kt
+│   │   │   │               │   │   │   ├── ClipboardSuggestionUi.kt
+│   │   │   │               │   │   │   ├── InlineSuggestionsUi.kt
+│   │   │   │               │   │   │   ├── TabUi.kt
+│   │   │   │               │   │   │   └── ToolButton.kt
+│   │   │   │               │   │   ├── InputBarDelegate.kt
+│   │   │   │               │   │   ├── QuickBarStateMachine.kt
+│   │   │   │               │   │   └── UnrollButtonStateMachine.kt
+│   │   │   │               │   ├── broadcast/
+│   │   │   │               │   │   ├── EnterKeyDisplayDelegate.kt
+│   │   │   │               │   │   ├── InputBroadcastReceiver.kt
+│   │   │   │               │   │   └── InputBroadcaster.kt
+│   │   │   │               │   ├── candidates/
+│   │   │   │               │   │   ├── compact/
+│   │   │   │               │   │   │   ├── CompactCandidateDelegate.kt
+│   │   │   │               │   │   │   ├── CompactCandidateMode.kt
+│   │   │   │               │   │   │   └── CompactCandidateViewAdapter.kt
+│   │   │   │               │   │   ├── popup/
+│   │   │   │               │   │   │   ├── CandidateItemSpan.kt
+│   │   │   │               │   │   │   ├── LabeledCandidateItemUi.kt
+│   │   │   │               │   │   │   ├── PagedCandidatesUi.kt
+│   │   │   │               │   │   │   ├── PaginationUi.kt
+│   │   │   │               │   │   │   ├── PopupCandidatesLayout.kt
+│   │   │   │               │   │   │   └── PopupCandidatesMode.kt
+│   │   │   │               │   │   ├── unrolled/
+│   │   │   │               │   │   │   ├── decoration/
+│   │   │   │               │   │   │   │   ├── FlexboxHorizontalDecoration.kt
+│   │   │   │               │   │   │   │   └── FlexboxVerticalDecoration.kt
+│   │   │   │               │   │   │   ├── window/
+│   │   │   │               │   │   │   │   ├── BaseUnrolledCandidateWindow.kt
+│   │   │   │               │   │   │   │   └── FlexboxUnrolledCandidateWindow.kt
+│   │   │   │               │   │   │   ├── CandidatesPagingSource.kt
+│   │   │   │               │   │   │   ├── PagingCandidateViewAdapter.kt
+│   │   │   │               │   │   │   └── UnrolledCandidateLayout.kt
+│   │   │   │               │   │   ├── CandidateItemUi.kt
+│   │   │   │               │   │   └── CandidateViewHolder.kt
+│   │   │   │               │   ├── clipboard/
+│   │   │   │               │   │   ├── ClipboardAdapter.kt
+│   │   │   │               │   │   ├── ClipboardBeanUi.kt
+│   │   │   │               │   │   ├── ClipboardLayout.kt
+│   │   │   │               │   │   ├── ClipboardPageUi.kt
+│   │   │   │               │   │   ├── ClipboardPagesAdapter.kt
+│   │   │   │               │   │   ├── ClipboardTitleUi.kt
+│   │   │   │               │   │   └── ClipboardWindow.kt
+│   │   │   │               │   ├── composition/
+│   │   │   │               │   │   ├── CandidatesView.kt
+│   │   │   │               │   │   ├── PopupPosition.kt
+│   │   │   │               │   │   ├── PreeditDelegate.kt
+│   │   │   │               │   │   ├── PreeditTextView.kt
+│   │   │   │               │   │   └── PreeditUi.kt
+│   │   │   │               │   ├── core/
+│   │   │   │               │   │   ├── AutoScaleTextView.kt
+│   │   │   │               │   │   ├── BaseInputView.kt
+│   │   │   │               │   │   ├── InlinePreeditMode.kt
+│   │   │   │               │   │   ├── InlineSuggestions.kt
+│   │   │   │               │   │   ├── InputDeviceManager.kt
+│   │   │   │               │   │   ├── InputTabLayout.kt
+│   │   │   │               │   │   ├── InputView.kt
+│   │   │   │               │   │   ├── LifecycleInputMethodService.kt
+│   │   │   │               │   │   ├── NavigationBarManager.kt
+│   │   │   │               │   │   ├── TouchEventReceiverWindow.kt
+│   │   │   │               │   │   └── TrimeInputMethodService.kt
+│   │   │   │               │   ├── dependency/
+│   │   │   │               │   │   └── InputDependencyManager.kt
+│   │   │   │               │   ├── dialog/
+│   │   │   │               │   │   └── EnabledSchemaPickerDialog.kt
+│   │   │   │               │   ├── keyboard/
+│   │   │   │               │   │   ├── CommonKeyboardActionListener.kt
+│   │   │   │               │   │   ├── GestureFrame.kt
+│   │   │   │               │   │   ├── InputFeedbackManager.kt
+│   │   │   │               │   │   ├── Key.kt
+│   │   │   │               │   │   ├── KeyAction.kt
+│   │   │   │               │   │   ├── KeyBehavior.kt
+│   │   │   │               │   │   ├── KeyCode.kt
+│   │   │   │               │   │   ├── KeyView.kt
+│   │   │   │               │   │   ├── Keyboard.kt
+│   │   │   │               │   │   ├── KeyboardActionListener.kt
+│   │   │   │               │   │   ├── KeyboardPrefs.kt
+│   │   │   │               │   │   ├── KeyboardSwitcher.kt
+│   │   │   │               │   │   ├── KeyboardView.kt
+│   │   │   │               │   │   └── KeyboardWindow.kt
+│   │   │   │               │   ├── language/
+│   │   │   │               │   │   ├── LanguageModeBar.kt
+│   │   │   │               │   │   ├── LanguagePredictor.kt
+│   │   │   │               │   │   ├── LanguageSwitchPolicy.kt
+│   │   │   │               │   │   └── RuleBasedPredictor.kt
+│   │   │   │               │   ├── popup/
+│   │   │   │               │   │   ├── PopupAction.kt
+│   │   │   │               │   │   ├── PopupActionListener.kt
+│   │   │   │               │   │   ├── PopupContainerUi.kt
+│   │   │   │               │   │   ├── PopupDelegate.kt
+│   │   │   │               │   │   ├── PopupEntryUi.kt
+│   │   │   │               │   │   └── PopupKeyboardUi.kt
+│   │   │   │               │   ├── segments/
+│   │   │   │               │   │   ├── DragSelectTouchListener.kt
+│   │   │   │               │   │   ├── SegmentUi.kt
+│   │   │   │               │   │   ├── SegmentsAdapter.kt
+│   │   │   │               │   │   ├── SegmentsUi.kt
+│   │   │   │               │   │   └── SegmentsWindow.kt
+│   │   │   │               │   ├── switches/
+│   │   │   │               │   │   ├── SwitchOptionAdapter.kt
+│   │   │   │               │   │   ├── SwitchOptionEntry.kt
+│   │   │   │               │   │   ├── SwitchOptionEntryUi.kt
+│   │   │   │               │   │   └── SwitchOptionWindow.kt
+│   │   │   │               │   ├── symbol/
+│   │   │   │               │   │   ├── LiquidAdapter.kt
+│   │   │   │               │   │   ├── LiquidData.kt
+│   │   │   │               │   │   ├── LiquidItemUi.kt
+│   │   │   │               │   │   ├── LiquidLayout.kt
+│   │   │   │               │   │   ├── LiquidTabsUi.kt
+│   │   │   │               │   │   ├── LiquidWindow.kt
+│   │   │   │               │   │   └── SpacesItemDecoration.kt
+│   │   │   │               │   └── window/
+│   │   │   │               │       ├── BoardWindow.kt
+│   │   │   │               │       ├── BoardWindowManager.kt
+│   │   │   │               │       └── ResidentWindow.kt
+│   │   │   │               ├── provider/
+│   │   │   │               │   └── RimeDataProvider.kt
+│   │   │   │               ├── receiver/
+│   │   │   │               │   └── RimeIntentReceiver.kt
+│   │   │   │               ├── ui/
+│   │   │   │               │   ├── common/
+│   │   │   │               │   │   ├── OnItemChangedListener.kt
+│   │   │   │               │   │   ├── PaddingPreferenceFragment.kt
+│   │   │   │               │   │   └── ProgressBarDialogIndeterminate.kt
+│   │   │   │               │   ├── main/
+│   │   │   │               │   │   ├── log/
+│   │   │   │               │   │   │   ├── LogAdapter.kt
+│   │   │   │               │   │   │   └── LogView.kt
+│   │   │   │               │   │   ├── settings/
+│   │   │   │               │   │   │   ├── schema/
+│   │   │   │               │   │   │   │   ├── SchemaListAdapter.kt
+│   │   │   │               │   │   │   │   ├── SchemaListEntryUi.kt
+│   │   │   │               │   │   │   │   ├── SchemaListFragment.kt
+│   │   │   │               │   │   │   │   └── SchemaListUi.kt
+│   │   │   │               │   │   │   ├── theme/
+│   │   │   │               │   │   │   │   └── ThemeSettingsFragment.kt
+│   │   │   │               │   │   │   ├── userdict/
+│   │   │   │               │   │   │   │   ├── UserDictListAdapter.kt
+│   │   │   │               │   │   │   │   ├── UserDictListEntryUi.kt
+│   │   │   │               │   │   │   │   ├── UserDictListUi.kt
+│   │   │   │               │   │   │   │   └── UserDictionaryFragment.kt
+│   │   │   │               │   │   │   ├── AdvancedSettingsFragment.kt
+│   │   │   │               │   │   │   ├── CandidatesSettingsFragment.kt
+│   │   │   │               │   │   │   ├── ClipboardSettingsFragment.kt
+│   │   │   │               │   │   │   ├── ColorPickerDialog.kt
+│   │   │   │               │   │   │   ├── DialogSeekBarPreference.kt
+│   │   │   │               │   │   │   ├── EditTextIntPreference.kt
+│   │   │   │               │   │   │   ├── GeneralSettingsFragment.kt
+│   │   │   │               │   │   │   ├── KeyboardSettingsFragment.kt
+│   │   │   │               │   │   │   ├── ProfileSettingsFragment.kt
+│   │   │   │               │   │   │   ├── ProgressFragment.kt
+│   │   │   │               │   │   │   ├── SoundEffectPickerDialog.kt
+│   │   │   │               │   │   │   └── ThemePickerDialog.kt
+│   │   │   │               │   │   ├── AboutFragment.kt
+│   │   │   │               │   │   ├── ClipEditActivity.kt
+│   │   │   │               │   │   ├── DeveloperFragment.kt
+│   │   │   │               │   │   ├── LicenseFragment.kt
+│   │   │   │               │   │   ├── LogActivity.kt
+│   │   │   │               │   │   ├── MainActivity.kt
+│   │   │   │               │   │   ├── MainFragment.kt
+│   │   │   │               │   │   ├── MainViewModel.kt
+│   │   │   │               │   │   ├── NavigationRoute.kt
+│   │   │   │               │   │   └── TestInputPanel.kt
+│   │   │   │               │   └── setup/
+│   │   │   │               │       ├── SetupActivity.kt
+│   │   │   │               │       ├── SetupFragment.kt
+│   │   │   │               │       └── SetupPage.kt
+│   │   │   │               ├── util/
+│   │   │   │               │   ├── yaml/
+│   │   │   │               │   │   ├── Node.kt
+│   │   │   │               │   │   ├── Parser.kt
+│   │   │   │               │   │   └── Yaml.kt
+│   │   │   │               │   ├── AppContext.kt
+│   │   │   │               │   ├── AppUtils.kt
+│   │   │   │               │   ├── Bundle.kt
+│   │   │   │               │   ├── Char.kt
+│   │   │   │               │   ├── Color.kt
+│   │   │   │               │   ├── ColorUtils.kt
+│   │   │   │               │   ├── Configuration.kt
+│   │   │   │               │   ├── Const.kt
+│   │   │   │               │   ├── DateTime.kt
+│   │   │   │               │   ├── DeviceInfo.kt
+│   │   │   │               │   ├── DeviceUtils.kt
+│   │   │   │               │   ├── Dimensions.kt
+│   │   │   │               │   ├── Drawable.kt
+│   │   │   │               │   ├── ErrorDialog.kt
+│   │   │   │               │   ├── EventStateMachine.kt
+│   │   │   │               │   ├── Exception.kt
+│   │   │   │               │   ├── FileUtils.kt
+│   │   │   │               │   ├── InputMethod.kt
+│   │   │   │               │   ├── InputMethodUtils.kt
+│   │   │   │               │   ├── Intent.kt
+│   │   │   │               │   ├── KeyCharacterMap.kt
+│   │   │   │               │   ├── Logcat.kt
+│   │   │   │               │   ├── Menu.kt
+│   │   │   │               │   ├── NaiveDustman.kt
+│   │   │   │               │   ├── NativeTokenizer.kt
+│   │   │   │               │   ├── NavController.kt
+│   │   │   │               │   ├── NinePatchBitmapFactory.kt
+│   │   │   │               │   ├── Notifications.kt
+│   │   │   │               │   ├── Permissions.kt
+│   │   │   │               │   ├── PreferenceScreen.kt
+│   │   │   │               │   ├── Process.kt
+│   │   │   │               │   ├── Rect.kt
+│   │   │   │               │   ├── RecyclerView.kt
+│   │   │   │               │   ├── Regex.kt
+│   │   │   │               │   ├── ResourceUtils.kt
+│   │   │   │               │   ├── Splitties.kt
+│   │   │   │               │   ├── StartActivity.kt
+│   │   │   │               │   ├── Strings.kt
+│   │   │   │               │   ├── Toast.kt
+│   │   │   │               │   └── WeakHashSet.kt
+│   │   │   │               ├── worker/
+│   │   │   │               │   └── BackgroundSyncWork.kt
+│   │   │   │               └── TrimeApplication.kt
+│   │   │   ├── jni/
+│   │   │   │   ├── cmake/
+│   │   │   │   │   ├── Boost.cmake
+│   │   │   │   │   ├── FindBoost.cmake
+│   │   │   │   │   ├── FindGlog.cmake
+│   │   │   │   │   ├── FindLevelDb.cmake
+│   │   │   │   │   ├── FindMarisa.cmake
+│   │   │   │   │   ├── FindOpencc.cmake
+│   │   │   │   │   ├── FindYamlCpp.cmake
+│   │   │   │   │   ├── OpenccWorkarounds.cmake
+│   │   │   │   │   ├── README.md
+│   │   │   │   │   └── Rime.cmake
+│   │   │   │   ├── librime_jni/
+│   │   │   │   │   ├── CMakeLists.txt
+│   │   │   │   │   ├── config.cc
+│   │   │   │   │   ├── frontend.cc
+│   │   │   │   │   ├── frontend.h
+│   │   │   │   │   ├── helper-types.h
+│   │   │   │   │   ├── jni-utils.h
+│   │   │   │   │   ├── key.cc
+│   │   │   │   │   ├── levers.cc
+│   │   │   │   │   ├── objconv.h
+│   │   │   │   │   ├── opencc.cc
+│   │   │   │   │   ├── rime_jni.cc
+│   │   │   │   │   └── session.h
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── OpenCC
+│   │   │   │   ├── librime
+│   │   │   │   ├── librime-lua
+│   │   │   │   ├── librime-lua-deps
+│   │   │   │   ├── librime-octagram
+│   │   │   │   ├── librime-predict
+│   │   │   │   └── snappy
+│   │   │   ├── res/
+│   │   │   │   ├── color/
+│   │   │   │   │   └── text_input_type_pill.xml
+│   │   │   │   ├── drawable/
+│   │   │   │   │   ├── bg_inline_suggestion_dark.xml
+│   │   │   │   │   ├── bg_inline_suggestion_light.xml
+│   │   │   │   │   ├── ic_app_icon_foreground.xml
+│   │   │   │   │   ├── ic_baseline_add_24.xml
+│   │   │   │   │   ├── ic_baseline_arrow_back_24.xml
+│   │   │   │   │   ├── ic_baseline_arrow_drop_down_24.xml
+│   │   │   │   │   ├── ic_baseline_arrow_left_24.xml
+│   │   │   │   │   ├── ic_baseline_arrow_right_24.xml
+│   │   │   │   │   ├── ic_baseline_book_24.xml
+│   │   │   │   │   ├── ic_baseline_check_circle_24.xml
+│   │   │   │   │   ├── ic_baseline_color_lens_24.xml
+│   │   │   │   │   ├── ic_baseline_content_copy_24.xml
+│   │   │   │   │   ├── ic_baseline_delete_24.xml
+│   │   │   │   │   ├── ic_baseline_delete_sweep_24.xml
+│   │   │   │   │   ├── ic_baseline_deselect_24.xml
+│   │   │   │   │   ├── ic_baseline_edit_24.xml
+│   │   │   │   │   ├── ic_baseline_email_24.xml
+│   │   │   │   │   ├── ic_baseline_expand_less_24.xml
+│   │   │   │   │   ├── ic_baseline_expand_more_24.xml
+│   │   │   │   │   ├── ic_baseline_keyboard_24.xml
+│   │   │   │   │   ├── ic_baseline_link_24.xml
+│   │   │   │   │   ├── ic_baseline_list_alt_24.xml
+│   │   │   │   │   ├── ic_baseline_lock_24.xml
+│   │   │   │   │   ├── ic_baseline_more_horiz_24.xml
+│   │   │   │   │   ├── ic_baseline_numbers_24.xml
+│   │   │   │   │   ├── ic_baseline_phone_24.xml
+│   │   │   │   │   ├── ic_baseline_push_pin_24.xml
+│   │   │   │   │   ├── ic_baseline_refresh_reversed_24.xml
+│   │   │   │   │   ├── ic_baseline_search_24.xml
+│   │   │   │   │   ├── ic_baseline_select_all_24.xml
+│   │   │   │   │   ├── ic_baseline_settings_24.xml
+│   │   │   │   │   ├── ic_baseline_share_24.xml
+│   │   │   │   │   ├── ic_baseline_snippet_folder_24.xml
+│   │   │   │   │   ├── ic_baseline_star_24.xml
+│   │   │   │   │   ├── ic_baseline_sync_24.xml
+│   │   │   │   │   ├── ic_baseline_text_fields_24.xml
+│   │   │   │   │   ├── ic_baseline_tune_24.xml
+│   │   │   │   │   ├── ic_baseline_view_comfy_24.xml
+│   │   │   │   │   ├── ic_baseline_warning_24.xml
+│   │   │   │   │   ├── ic_clipboard_24.xml
+│   │   │   │   │   ├── ic_input_box.xml
+│   │   │   │   │   ├── ic_outline_cancel_24.xml
+│   │   │   │   │   ├── ic_outline_push_pin_24.xml
+│   │   │   │   │   ├── ic_round_view_list_24.xml
+│   │   │   │   │   └── ic_trime_status.xml
+│   │   │   │   ├── layout/
+│   │   │   │   │   ├── activity_clip_edit.xml
+│   │   │   │   │   ├── activity_log.xml
+│   │   │   │   │   ├── activity_main.xml
+│   │   │   │   │   ├── activity_setup.xml
+│   │   │   │   │   ├── fragment_setup.xml
+│   │   │   │   │   └── toolbar.xml
+│   │   │   │   ├── mipmap-anydpi-v26/
+│   │   │   │   │   ├── ic_app_icon.xml
+│   │   │   │   │   └── ic_app_icon_round.xml
+│   │   │   │   ├── mipmap-hdpi/
+│   │   │   │   │   ├── ic_app_icon.png
+│   │   │   │   │   └── ic_app_icon_round.png
+│   │   │   │   ├── mipmap-mdpi/
+│   │   │   │   │   ├── ic_app_icon.png
+│   │   │   │   │   └── ic_app_icon_round.png
+│   │   │   │   ├── mipmap-xhdpi/
+│   │   │   │   │   ├── ic_app_icon.png
+│   │   │   │   │   └── ic_app_icon_round.png
+│   │   │   │   ├── mipmap-xxhdpi/
+│   │   │   │   │   ├── ic_app_icon.png
+│   │   │   │   │   └── ic_app_icon_round.png
+│   │   │   │   ├── mipmap-xxxhdpi/
+│   │   │   │   │   ├── ic_app_icon.png
+│   │   │   │   │   └── ic_app_icon_round.png
+│   │   │   │   ├── values/
+│   │   │   │   │   ├── attrs.xml
+│   │   │   │   │   ├── colors.xml
+│   │   │   │   │   ├── ic_app_icon_background.xml
+│   │   │   │   │   ├── input_view_ids.xml
+│   │   │   │   │   ├── language_mvp.xml
+│   │   │   │   │   ├── strings.xml
+│   │   │   │   │   └── themes.xml
+│   │   │   │   ├── values-night/
+│   │   │   │   │   ├── colors.xml
+│   │   │   │   │   └── themes.xml
+│   │   │   │   ├── values-zh-rCN/
+│   │   │   │   │   ├── language_mvp.xml
+│   │   │   │   │   └── strings.xml
+│   │   │   │   ├── values-zh-rTW/
+│   │   │   │   │   └── strings.xml
+│   │   │   │   ├── xml/
+│   │   │   │   │   ├── method.xml
+│   │   │   │   │   └── provider_paths.xml
+│   │   │   │   └── xml-v30/
+│   │   │   │       └── method.xml
+│   │   │   ├── AndroidManifest.xml
+│   │   │   └── ic_app_icon-playstore.png
+│   │   └── test/
+│   │       ├── assets/
+│   │       │   ├── incorrect.yaml
+│   │       │   └── trime.yaml
+│   │       └── java/
+│   │           └── com/
+│   │               └── osfans/
+│   │                   └── trime/
+│   │                       ├── data/
+│   │                       │   ├── sync/
+│   │                       │   │   ├── AtomicLocalFileCopyTest.kt
+│   │                       │   │   ├── BoundedCopyPoolTest.kt
+│   │                       │   │   ├── OrphanCleanerTest.kt
+│   │                       │   │   ├── SafDisplayPathTest.kt
+│   │                       │   │   ├── SafTreeWalkerTest.kt
+│   │                       │   │   └── SyncRelativePathTest.kt
+│   │                       │   └── theme/
+│   │                       │       └── GeneralStyleTest.kt
+│   │                       ├── ime/
+│   │                       │   └── language/
+│   │                       │       └── LanguageSwitchPolicyTest.kt
+│   │                       └── util/
+│   │                           └── WeakHashSetTest.kt
+│   ├── build.gradle.kts
+│   └── proguard-rules.pro
+├── build-logic/
+│   ├── convention/
+│   │   ├── src/
+│   │   │   └── main/
+│   │   │       └── kotlin/
+│   │   │           ├── AndroidAppConventionPlugin.kt
+│   │   │           ├── AndroidBaseConventionPlugin.kt
+│   │   │           ├── DataChecksumsPlugin.kt
+│   │   │           ├── NativeAppConventionPlugin.kt
+│   │   │           ├── NativeBaseConventionPlugin.kt
+│   │   │           ├── NativeCacheHashPlugin.kt
+│   │   │           ├── OpenCCDataPlugin.kt
+│   │   │           ├── ProjectExtensions.kt
+│   │   │           ├── Utils.kt
+│   │   │           └── Versions.kt
+│   │   └── build.gradle.kts
+│   ├── gradle/
+│   │   └── wrapper/
+│   │       └── gradle-wrapper.properties
+│   └── settings.gradle.kts
+├── codegen/
+│   ├── src/
+│   │   └── main/
+│   │       ├── java/
+│   │       │   └── com/
+│   │       │       └── osfans/
+│   │       │           └── trime/
+│   │       │               └── codegen/
+│   │       │                   └── GenKeyMapping.kt
+│   │       └── resources/
+│   │           └── META-INF/
+│   │               └── services/
+│   │                   └── com.google.devtools.ksp.processing.SymbolProcessorProvider
+│   ├── .gitignore
+│   └── build.gradle.kts
+├── doc/
+│   ├── Keyboard.md
+│   └── trime-schema.json
+├── docs/
+│   ├── CHANGED-FILES.md
+│   ├── DIRECTORY-TREE.txt
+│   ├── MVP.md
+│   ├── build-mvp.md
+│   ├── wanxiang-assets.manifest.json
+│   ├── wanxiang-mvp.md
+│   ├── wanxiang-resources.lock.json
+│   └── wanxiang-validation.json
+├── fastlane/
+│   └── metadata/
+│       └── android/
+│           ├── en-US/
+│           │   ├── images/
+│           │   │   └── icon.png
+│           │   ├── full_description.txt
+│           │   └── short_description.txt
+│           ├── zh-CN/
+│           │   ├── full_description.txt
+│           │   └── short_description.txt
+│           └── zh-TW/
+│               ├── full_description.txt
+│               └── short_description.txt
+├── gradle/
+│   ├── wrapper/
+│   │   ├── gradle-wrapper.jar
+│   │   └── gradle-wrapper.properties
+│   └── libs.versions.toml
+├── patches/
+│   └── lua.patch
+├── script/
+│   └── clang-format.sh
+├── scripts/
+│   ├── qa/
+│   │   ├── editor/
+│   │   │   ├── AndroidManifest.xml
+│   │   │   └── MainActivity.java
+│   │   ├── README.md
+│   │   ├── build-editor.py
+│   │   └── emulator-smoke.py
+│   ├── build-mvp.ps1
+│   ├── download-wanxiang.py
+│   ├── import-wanxiang.py
+│   ├── prepare-mvp-native.ps1
+│   └── verify-wanxiang.py
+├── .clang-format
+├── .editorconfig
+├── .git-blame-ignore-revs
+├── .gitattributes
+├── .gitignore
+├── .gitmodules
+├── AUTHORS
+├── CHANGELOG.md
+├── CODE_OF_CONDUCT.md
+├── CONTRIBUTING.md
+├── LICENSE
+├── Makefile
+├── PRIVACY.md
+├── README-MVP.md
+├── README.md
+├── README_sc.md
+├── README_tc.md
+├── build.gradle.kts
+├── cliff.toml
+├── gradle.properties
+├── gradlew
+├── gradlew.bat
+├── osfans_alipay.png
+└── settings.gradle.kts

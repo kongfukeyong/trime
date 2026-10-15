@@ -29,40 +29,5 @@ try {
     }
     & $Gradle @tasks @proxyArgs '-PmvpPrebuiltDir=app/build/mvp-prebuilt' '-PbuildABI=arm64-v8a,x86_64' '-PbuildVersionName=v3.3.12-mvp' '--console=plain' '--max-workers=4' '-Dorg.gradle.internal.http.socketTimeout=30000' '-Dorg.gradle.internal.http.connectionTimeout=30000' 2>&1 | Tee-Object "$OutputDir/build-mvp.log"
     if ($LASTEXITCODE -ne 0) { throw "Gradle failed: $LASTEXITCODE (see build-mvp.log)" }
-    $apks = @(Get-ChildItem 'app/build/outputs/apk/debug' -Filter '*.apk')
-    if ($apks.Count -ne 2) { throw "Expected two ABI APKs, got $($apks.Count)" }
-    foreach ($apk in $apks) {
-        & "$env:ANDROID_HOME/build-tools/36.0.0/apksigner.bat" verify --verbose $apk.FullName
-        if ($LASTEXITCODE -ne 0) { throw "APK signature validation failed: $apk" }
-        & "$env:ANDROID_HOME/build-tools/36.0.0/zipalign.exe" -c -p 4 $apk.FullName
-        if ($LASTEXITCODE -ne 0) { throw "APK alignment validation failed: $apk" }
-        $permissions = & "$env:ANDROID_HOME/build-tools/36.0.0/aapt.exe" dump permissions $apk.FullName
-        if ($LASTEXITCODE -ne 0) { throw 'Cannot read APK permissions' }
-        if ($permissions -match 'android.permission.INTERNET') { throw 'APK must not request INTERNET permission' }
-        $zip = [IO.Compression.ZipFile]::OpenRead($apk.FullName)
-        try {
-            $nativeEntries = @($zip.Entries | Where-Object { $_.FullName -match '^lib/(arm64-v8a|x86_64)/librime_jni\.so$' })
-            if ($nativeEntries.Count -ne 1) { throw 'Each APK must contain exactly one supported JNI ABI' }
-            $nativeEntry = $nativeEntries[0]
-            $abi = $nativeEntry.FullName.Split('/')[1]
-            $expected = (Get-FileHash "app/build/mvp-prebuilt/jniLibs/$abi/librime_jni.so").Hash
-            $stream = $nativeEntry.Open()
-            $sha = [Security.Cryptography.SHA256]::Create()
-            try { $actual = [BitConverter]::ToString($sha.ComputeHash($stream)).Replace('-', '') }
-            finally { $stream.Dispose(); $sha.Dispose() }
-            if ($actual -ne $expected) { throw "Packaged native library changed for $abi" }
-            $defaultEntry = $zip.GetEntry('assets/shared/default.yaml')
-            if (!$defaultEntry) { throw 'APK missing assets/shared/default.yaml' }
-            foreach ($entry in $zip.Entries) {
-                if ($entry.FullName.StartsWith('assets/shared/') -and ($entry.Length -lt 256 -or $entry -eq $defaultEntry) -and !$entry.FullName.EndsWith('/')) {
-                    $reader = [IO.StreamReader]::new($entry.Open())
-                    try { $text = $reader.ReadToEnd() } finally { $reader.Dispose() }
-                    if ($text.Trim().StartsWith('../../../../data/rime/')) { throw "APK contains symlink placeholder: $($entry.FullName)" }
-                }
-            }
-        } finally { $zip.Dispose() }
-        Copy-Item -LiteralPath $apk.FullName -Destination $OutputDir
-    }
-    Get-ChildItem $OutputDir -Filter '*.apk' | Get-FileHash -Algorithm SHA256 | Format-Table -AutoSize | Out-String -Width 300 | Set-Content "$OutputDir/apk-sha256.txt"
-    Copy-Item 'app/build/mvp-prebuilt/provenance.json' "$OutputDir/native-provenance.json"
+    & "$PSScriptRoot/verify-mvp-apks.ps1" -AndroidSdk $env:ANDROID_HOME -OutputDir $OutputDir
 } finally { Pop-Location }
