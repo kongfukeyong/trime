@@ -2,6 +2,10 @@
 
 These development-only tools do not modify Trime's product code or require Gradle. Use a **fresh disposable emulator**; the runner refuses a physical device or an already-installed product. No credentials are needed. The helper APK has no permissions and uses a dedicated disposable test key.
 
+`build-editor.py` now builds **two** APKs in the same output directory: `trime-qa-editor.apk` and `trime-qa-automation.apk`. The smoke runner automatically finds the latter beside `--editor` (optional override: `--automation`) and installs it immediately after device validation, before any case capture or setup-wizard query. Existing workflow command lines need no extra argument.
+
+The independent instrumentation package `local.trime.qa.automation` targets **itself**, has no Activity, and never starts/stops the editor or product. Each `nodes()` invocation runs `am instrument -w local.trime.qa.automation/.DumpInstrumentation`. It enables `FLAG_RETRIEVE_INTERACTIVE_WINDOWS`, reports view IDs, and traverses `UiAutomation.getWindows()` to include both editor and IME windows. XML retains the existing node attributes, omits invisible/empty-bounds nodes, and has `<hierarchy source="all-windows">`. It returns single-line XML via `Instrumentation.finish()` Bundle key `xml`; the host requires successful instrumentation status/code, parses `INSTRUMENTATION_RESULT: xml=...`, then saves `latest-ui.xml`. It does **not** write `/sdcard` or request storage permission, and does not fall back to stale or active-window-only XML. API35 runtime verification of this replacement is pending; both helpers were actually compiled and signature-verified locally with SDK36/JDK21.
+
 From the repository root, with JDK 21 and Android SDK build-tools 36.0.0 / platform 36 installed:
 
 ```sh

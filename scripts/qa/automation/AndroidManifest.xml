@@ -1,0 +1,5 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="local.trime.qa.automation" android:versionCode="1" android:versionName="1.0">
+    <uses-sdk android:minSdkVersion="23" android:targetSdkVersion="34" />
+    <application android:label="Trime QA Window Dumper" android:allowBackup="false" android:debuggable="true" />
+    <instrumentation android:name=".DumpInstrumentation" android:targetPackage="local.trime.qa.automation" android:handleProfiling="false" android:functionalTest="false" />
+</manifest>

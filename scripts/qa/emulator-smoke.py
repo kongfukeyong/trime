@@ -13,6 +13,7 @@ import zipfile
 
 PACKAGE = 'com.osfans.trime.debug'
 EDITOR = 'local.trime.qa.editor'
+AUTOMATION = 'local.trime.qa.automation'
 IME = PACKAGE + '/com.osfans.trime.ime.core.TrimeInputMethodService'
 CASES = ['install', 'launch', 'enable-ime', 'first-run-storage', 'wanxiang-deployment', 'mode-bar',
          'auto-pinyin', 'auto-english', 'force-chinese', 'force-english']
@@ -31,7 +32,7 @@ def select_apk(path):
 
 
 def center(bounds):
-    points = list(map(int, re.findall(r'\d+', bounds)))
+    points = list(map(int, re.findall(r'-?\d+', bounds)))
     if len(points) != 4 or points[2] <= points[0] or points[3] <= points[1]:
         raise ValueError('Invalid UI bounds: '+bounds)
     return (points[0]+points[2])//2, (points[1]+points[3])//2
@@ -45,6 +46,7 @@ class Smoke:
         self.base = [args.adb] + (['-s', args.serial] if args.serial else [])
         self.log_process = None
         self.log_handle = None
+        self.dumper_installed = False
 
     def adb(self, *args, check=True, timeout=30, binary=False):
         result = subprocess.run(self.base+list(map(str,args)), stdout=subprocess.PIPE,
@@ -58,10 +60,20 @@ class Smoke:
         return result.stdout if binary else result.stdout.decode('utf-8','replace').strip()
 
     def nodes(self):
-        self.adb('shell','uiautomator','dump','/sdcard/qa-window.xml',timeout=20)
-        xml = self.adb('shell','cat','/sdcard/qa-window.xml')
+        if not self.dumper_installed:
+            raise RuntimeError('QA all-window instrumentation not installed')
+        result = self.adb('shell','am','instrument','-w',AUTOMATION+'/.DumpInstrumentation',timeout=40)
+        status = re.search(r'^INSTRUMENTATION_RESULT: qa_dump_status=ok\s*$',result,re.MULTILINE)
+        code = re.search(r'^INSTRUMENTATION_CODE: -1\s*$',result,re.MULTILINE)
+        matches = re.findall(r'^INSTRUMENTATION_RESULT: xml=(.*)$',result,re.MULTILINE)
+        if not status or not code or len(matches) != 1:
+            raise RuntimeError('All-window dump failed: '+result[-3000:])
+        xml = matches[0].rstrip('\r')
+        root = ET.fromstring(xml)
+        if root.tag != 'hierarchy' or root.get('source') != 'all-windows':
+            raise RuntimeError('Unexpected all-window XML format')
         (self.out/'latest-ui.xml').write_text(xml,encoding='utf-8')
-        return list(ET.fromstring(xml).iter('node'))
+        return list(root.iter('node'))
 
     def tap_node(self, node):
         self.adb('shell','input','tap',*center(node.get('bounds','')))
@@ -239,6 +251,11 @@ class Smoke:
             self.adb('wait-for-device',timeout=120)
             if self.adb('shell','getprop','ro.kernel.qemu') != '1':
                 raise RuntimeError('This script requires a disposable emulator')
+            dumper = self.args.automation or self.args.editor.with_name('trime-qa-automation.apk')
+            installed = self.adb('install','-r',dumper,timeout=60)
+            if 'Success' not in installed:
+                raise RuntimeError('Could not install QA automation: '+installed)
+            self.dumper_installed = True
             if self.adb('shell','pm','path',PACKAGE,check=False).startswith('package:'):
                 raise RuntimeError('Product already installed: fresh emulator required for deployment proof')
             apk = select_apk(self.args.apk)
@@ -308,6 +325,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--apk',type=Path,required=True,help='APK or downloaded artifact directory')
     p.add_argument('--editor',type=Path,required=True)
+    p.add_argument('--automation',type=Path,help='Defaults to trime-qa-automation.apk beside --editor')
     p.add_argument('--output',type=Path,default=Path('outputs/emulator-smoke'))
     p.add_argument('--deploy-timeout',type=int,default=600)
     p.add_argument('--adb',default='adb')

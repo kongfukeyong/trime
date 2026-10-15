@@ -19,9 +19,24 @@
 
 证据：`outputs/build-mvp.log`、`outputs/unit-test-summary.json`、`outputs/apk-validation.json`、`outputs/apk-sha256.txt`，以及 `app/build/reports/tests/testDebugUnitTest/index.html`。
 
-## Android 端到端验证：进行中
+## 云端干净构建：通过
 
-[独立云端构建与全新 API 35 模拟器验收](https://github.com/kongfukeyong/trime/actions/runs/38664007863) 将安装 x86_64 包，通过真实首次启动向导选择应用专用存储，验证万象编译部署、模型校验、模式条、拼音候选上屏、英文续写及两种手动覆盖。此处尚不声明安装或输入行为通过，完成后更新实际结果。
+[运行 38664007863](https://github.com/kongfukeyong/trime/actions/runs/38664007863) 从提交 `1e7f839914da20b559172992cb8a89483f85f1b2` 构建，Windows 构建任务成功，44 项测试通过。两个 APK 的静态校验全部通过。云端 debug 密钥、构建时间与本地不同，因此 APK 哈希不同；模拟器测试使用下列云端 x86_64 包。
+
+| ABI | 云端 APK SHA-256 |
+| --- | --- |
+| arm64-v8a | `6eaaebdd9e41238b65ecac76e8d9262577a5515d1396a6d6e6275529a3f0f4ee` |
+| x86_64 | `0bb404a5b8910300b0bbb27149e1ce409bf6c08ddede7bf1a8263e80be90b059` |
+
+云端日志和报告已保存在 `outputs/ci-build-116191989659.log`、`outputs/ci-build-evidence/apk-validation.json` 和 `outputs/ci-build-evidence/unit-tests-index.html`。GitHub artifact 名称为 `trime-offline-language-mvp`，保留 14 天；本地交付文件不受该期限影响。
+
+## Android 端到端验证：部分通过，复测中
+
+第一次 [API 35 模拟器验收](https://github.com/kongfukeyong/trime/actions/runs/38664007863) 已验证 x86_64 APK 安装、启动、输入法启用、真实向导选择应用专用存储、万象成功部署、schema/prism/table 生成及部署模型 SHA。设备 crash buffer 为空。
+
+模式条在截图中正常显示；旧 `uiautomator dump` 只返回活动编辑器窗口，未包含 IME 窗口，导致测试在模式条断言处停止。输入切换用例当时为 NOT_RUN。正在修复测试窗口读取并复用同一云端 APK 复测。
+
+原始证据：`outputs/ci-smoke-38664007863/emulator-smoke/summary.json`、`mode-bar.png`、`mode-bar.xml`、`deployed-model-sha256.txt`、`logcat.txt`。
 
 脚本使用真实物理按键事件经过 IME 接口，模式按钮通过 UI 点击；软键盘字母触摸、手势、跨应用和 ARM 真机兼容性不在该脚本覆盖范围内。
 
