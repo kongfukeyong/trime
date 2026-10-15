@@ -103,7 +103,7 @@ adb shell ime enable com.osfans.trime.debug/com.osfans.trime.ime.core.TrimeInput
 adb shell ime set com.osfans.trime.debug/com.osfans.trime.ime.core.TrimeInputMethodService
 ```
 
-也可以在 Android 设置中手动启用并选择本输入法。首次启动等待万象部署完成。普通文本框中打开键盘，确认顶部有三态模式条。
+也可以在 Android 设置中手动启用并选择本输入法。首次打开 Trime，在设置向导中选择“应用专用存储”（App-specific storage），依次完成启用、选择输入法，再等待万象部署完成。本 MVP 的资源已内置，不需要选择外部同步目录。普通文本框中打开键盘，确认顶部有三态模式条。
 
 ## 手动验收流程
 

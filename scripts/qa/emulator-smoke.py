@@ -14,7 +14,7 @@ import zipfile
 PACKAGE = 'com.osfans.trime.debug'
 EDITOR = 'local.trime.qa.editor'
 IME = PACKAGE + '/com.osfans.trime.ime.core.TrimeInputMethodService'
-CASES = ['install', 'launch', 'enable-ime', 'wanxiang-deployment', 'mode-bar',
+CASES = ['install', 'launch', 'enable-ime', 'first-run-storage', 'wanxiang-deployment', 'mode-bar',
          'auto-pinyin', 'auto-english', 'force-chinese', 'force-english']
 
 
@@ -165,11 +165,49 @@ class Smoke:
                   'overall':'PASS' if all(v['status']=='PASS' for v in self.results.values()) else 'INCOMPLETE_OR_FAILED'}
         (self.out/'summary.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
 
+    def first_run_storage(self):
+        # Default product preference is EXTERNAL_SYNC, with no tree URI on a
+        # fresh install. Complete the real wizard instead of editing preferences.
+        self.capture('setup-before-storage')
+        selected_local = False
+        next_clicks = 0
+
+        def advance():
+            nonlocal selected_local, next_clicks
+            activities = self.adb('shell','dumpsys','activity','activities')
+            if re.search(r'(?:mResumedActivity|topResumedActivity)[^\n]*com\.osfans\.trime\.ui\.main\.MainActivity\b', activities):
+                if not selected_local:
+                    raise ValueError('Fresh-install wizard did not expose the required local-storage choice')
+                return True
+            nodes = self.nodes()
+            for node in nodes:
+                if node.get('resource-id') == PACKAGE+':id/app_specific_storage_option':
+                    if node.get('checked') != 'true':
+                        self.tap_node(node)
+                        self.capture('setup-local-storage-selected')
+                    selected_local = True
+                    break
+            if selected_local:
+                for node in self.nodes():
+                    if node.get('resource-id') == PACKAGE+':id/next_button' and node.get('enabled') == 'true':
+                        if next_clicks >= 5:
+                            raise ValueError('Wizard did not finish after five Next/Done actions')
+                        self.tap_node(node)
+                        next_clicks += 1
+                        break
+            return False
+
+        self.wait(advance,90,'local storage selection and resumed MainActivity')
+        return {'storage_mode':'APP_STORAGE','configuration_path':'real setup UI','next_done_clicks':next_clicks}
+
     def deployment(self):
         root = f'/sdcard/Android/data/{PACKAGE}/files'
         def ready():
             log = (self.out/'logcat.txt').read_text(encoding='utf-8',errors='replace')
-            if 'DeployMessage(state=Success)' not in log:
+            states = re.findall(r'Handling DeployMessage\(state=(Start|Success|Failure)\)',log)
+            if states and states[-1] == 'Failure':
+                raise ValueError('Rime emitted a deployment Failure; see logcat.txt')
+            if not states or states[-1] != 'Success':
                 return False
             # Probe app-generated runtime output, never just packaged assets.
             for name in ('wanxiang.schema.yaml','wanxiang.prism.bin','wanxiang.table.bin','default.yaml'):
@@ -226,6 +264,7 @@ class Smoke:
                 self.wait(lambda: self.adb('shell','pidof',PACKAGE,check=False),30,'Trime process')
                 return result
             self.case('launch',launch)
+            self.case('first-run-storage',self.first_run_storage)
             self.adb('install','-r',self.args.editor,timeout=60)
             self.adb('shell','am','start','-W','-n',EDITOR+'/.MainActivity')
             self.case('wanxiang-deployment',self.deployment)
@@ -248,7 +287,8 @@ class Smoke:
         finally:
             self.capture('final')
             for name, cmd in [('input-method',['shell','dumpsys','input_method']),('activities',['shell','dumpsys','activity','activities']),
-                              ('package',['shell','dumpsys','package',PACKAGE]),('getprop',['shell','getprop']),('crashes',['logcat','-b','crash','-d'])]:
+                              ('package',['shell','dumpsys','package',PACKAGE]),('getprop',['shell','getprop']),('crashes',['logcat','-b','crash','-d']),
+                              ('runtime-files-final',['shell','ls','-lR',f'/sdcard/Android/data/{PACKAGE}/files'])]:
                 try:
                     (self.out/(name+'.txt')).write_text(self.adb(*cmd,check=False),encoding='utf-8')
                 except Exception:

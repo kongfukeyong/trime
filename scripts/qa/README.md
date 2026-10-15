@@ -18,9 +18,9 @@ python scripts/qa/emulator-smoke.py \
 ## Assertions
 
 1. Fresh installation succeeds; source APK SHA-256 is saved.
-2. Trime is enabled and selected as default IME; MainActivity is launched and its process appears. No preference or Rime configuration is patched by the tests.
+2. Trime is enabled and selected as default IME; MainActivity is launched and its process appears. The fresh-install wizard defaults to EXTERNAL_SYNC without a tree URI. The test touches `app_specific_storage_option`, then Next/Done by resource ID, and requires resumed MainActivity within 90 seconds. This explicitly selects APP_STORAGE using the real product UI; no preference file or Rime configuration is patched.
 3. A separately built Java editor focuses an ordinary multiline text field. It supports Clear, hello and 你好 seed buttons, plus the `text` intent extra.
-4. Wait at most 600 seconds (plus bounded adb call overhead) for the real deployment success callback, nonempty compiled `wanxiang.schema.yaml`, `.prism.bin`, `.table.bin`, and first schema `wanxiang` in deployed `default.yaml`. Verify the runtime `.gram` SHA-256 against `docs/wanxiang-resources.lock.json` (additional 120-second command bound). Merely copying assets is not success.
+4. Wait at most 600 seconds (plus bounded adb call overhead) for the latest real `Handling DeployMessage(state=...)` callback to be Success, nonempty compiled `wanxiang.schema.yaml`, `.prism.bin`, `.table.bin`, and first schema `wanxiang` in deployed `default.yaml`. A Failure callback fails immediately. Verify the runtime `.gram` SHA-256 against `docs/wanxiang-resources.lock.json` (additional 120-second command bound). Merely copying assets is not success.
 5. UI hierarchy contains Auto / Chinese / English (or corresponding Simplified Chinese labels).
 6. AUTO with an empty ordinary field: type `nihao`, require selected Chinese mode after **each** key; space selects the first Rime candidate and must produce a Han character. Capture composition before commit.
 7. AUTO with committed `hello`: type `abc`, require exact `helloabc` and current mode EN.
@@ -32,6 +32,8 @@ Alphabetic events use `adb shell input keyevent KEYCODE_*`, which the checked-in
 UI tests support English and Simplified Chinese labels. Other app locales, theme changes, missing deployment debug logs or unreadable runtime files cause a failure/timeout with evidence; there is no fallback that claims success. Candidate selection uses space, not a guessed candidate coordinate. This verifies a Han commit, not an exact dictionary ranking or model prediction quality. The grammar hash proves the runtime file matches the model; it does not separately benchmark model inference.
 
 Deployment log source was checked in product code: JNI calls `Rime.handleRimeMessage(type, params)`, which constructs the native message and executes `Timber.d("Handling $message")`. `DeployMessage.toString()` emits `DeployMessage(state=Success)`. `TrimeApplication.onCreate()` plants a `Timber.DebugTree` for `BuildConfig.DEBUG` and its override delegates to `super.log`, so these debug messages reach Android logcat. This smoke job requires the debug APK; release builds filter out DEBUG messages and must not silently pass this assertion.
+
+Runtime paths were traced through `DataManager.sync()`: checksum entry `rime/<file>` resolves as a sibling of `files/shared`, so imported assets live under `/sdcard/Android/data/com.osfans.trime.debug/files/rime/`. The model is `rime/wanxiang-lts-zh-hans.gram`; native traits use that same directory as `user_data_dir`, and staging files are under `rime/build/`. The device-protected internal directory holds `checksums.json`, not the model. APP_STORAGE requires no SAF tree or broad storage permission. Notification permission is granted by adb before launch to avoid an unrelated dialog.
 
 ## Results and CI integration
 
