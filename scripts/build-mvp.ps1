@@ -34,11 +34,23 @@ try {
     foreach ($apk in $apks) {
         & "$env:ANDROID_HOME/build-tools/36.0.0/apksigner.bat" verify --verbose $apk.FullName
         if ($LASTEXITCODE -ne 0) { throw "APK signature validation failed: $apk" }
+        & "$env:ANDROID_HOME/build-tools/36.0.0/zipalign.exe" -c -p 4 $apk.FullName
+        if ($LASTEXITCODE -ne 0) { throw "APK alignment validation failed: $apk" }
         $permissions = & "$env:ANDROID_HOME/build-tools/36.0.0/aapt.exe" dump permissions $apk.FullName
         if ($LASTEXITCODE -ne 0) { throw 'Cannot read APK permissions' }
         if ($permissions -match 'android.permission.INTERNET') { throw 'APK must not request INTERNET permission' }
         $zip = [IO.Compression.ZipFile]::OpenRead($apk.FullName)
         try {
+            $nativeEntries = @($zip.Entries | Where-Object { $_.FullName -match '^lib/(arm64-v8a|x86_64)/librime_jni\.so$' })
+            if ($nativeEntries.Count -ne 1) { throw 'Each APK must contain exactly one supported JNI ABI' }
+            $nativeEntry = $nativeEntries[0]
+            $abi = $nativeEntry.FullName.Split('/')[1]
+            $expected = (Get-FileHash "app/build/mvp-prebuilt/jniLibs/$abi/librime_jni.so").Hash
+            $stream = $nativeEntry.Open()
+            $sha = [Security.Cryptography.SHA256]::Create()
+            try { $actual = [BitConverter]::ToString($sha.ComputeHash($stream)).Replace('-', '') }
+            finally { $stream.Dispose(); $sha.Dispose() }
+            if ($actual -ne $expected) { throw "Packaged native library changed for $abi" }
             $defaultEntry = $zip.GetEntry('assets/shared/default.yaml')
             if (!$defaultEntry) { throw 'APK missing assets/shared/default.yaml' }
             foreach ($entry in $zip.Entries) {

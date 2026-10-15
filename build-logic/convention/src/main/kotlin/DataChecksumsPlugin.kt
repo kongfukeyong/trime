@@ -48,8 +48,9 @@ class DataChecksumsPlugin : Plugin<Project> {
                 // of the linked Rime data. Real project resources override fallback.
                 from(target.assetsDir) {
                     exclude {
-                        it.file.isFile && it.file.length() < 256 &&
-                            it.file.readText().trim().startsWith("../../../../data/rime/")
+                        java.nio.file.Files.isSymbolicLink(it.file.toPath()) ||
+                            (it.file.isFile && it.file.length() < 256 &&
+                                it.file.readText().trim().startsWith("../../../../data/rime/"))
                     }
                 }
                 from(target.mvpPrebuiltDir!!.resolve("assets"))

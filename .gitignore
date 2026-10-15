@@ -485,4 +485,6 @@ app/src/main/jni/boost/
 # The 398 MB grammar model must not be committed to ordinary Git.
 /app/src/main/assets/rime/
 /outputs/
+__pycache__/
+*.pyc
 

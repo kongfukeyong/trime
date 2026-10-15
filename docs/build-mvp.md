@@ -43,16 +43,7 @@ python scripts/verify-wanxiang.py
 | `-ProxyUrl` | 可选，下载与 Gradle HTTP(S) 代理；不要在 CI 固定本机地址 |
 | `-RunTests` | 同时运行 `:app:testDebugUnitTest` |
 
-本机已使用的目录：
-
-```powershell
-./scripts/build-mvp.ps1 `
-  -JavaHome 'C:/Users/18164/Documents/Codex/2026-08-30/chatgpt-conversation-6a92f65a-d840-83eb-8b10/work/jdk/temurin21/jdk-21.0.12.1+1' `
-  -AndroidSdk 'C:/Users/18164/Documents/Codex/2026-09-17/ai-personal-cognitive-library-ai-tacit/work/android-sdk' `
-  -Gradle 'C:/Users/18164/Documents/Codex/2026-09-07/ni/work/gradle-dist/gradle-9.4.1/bin/gradle.bat' `
-  -ProxyUrl 'http://127.0.0.1:51081' `
-  -OutputDir ../outputs -RunTests
-```
+JDK、SDK 和可选 Gradle 安装路径通过参数传入，可复用本机已有工具链，无需使用特定个人目录。
 
 ## 原生库与资源来源
 
@@ -85,8 +76,8 @@ Windows 使用 `./gradlew.bat`，并确保 OpenCC 脚本调用的 `python3` 可�
 
 ## 验证记录与产物
 
-截至 2026-10-15，本地已完成官方双 ABI SHA/签名验证、全 shared fallback 提取；`default.yaml` 是真实 Rime 配置。Gradle 已解析 AGP9.2.1 并进入 build-logic 编译依赖下载。完整 assemble/test、实际 stage、最终 APK 验证仍在进行中，以构建日志与随后更新的记录为准。
+截至 2026-10-15，本地已完成官方双 ABI SHA/签名验证、全 shared fallback 提取、build-logic 与 codegen 编译，以及实际 `stageMvpAssets` / `generateDataChecksums` / `mergeDebugAssets`。独立复核确认 14 个占位均替换为官方真实数据、68 个万象资源 SHA 一致、114 个暂存文件与 checksums.json 一致，且没有四层路径占位；报告为 outputs/stage-validation.json。`shared/default.yaml` SHA-256 为 `dd55653a991f9418eb425ee2112666f82e3e753c5ce3ed5702dd243041a45382`。完整 assemble/test 与最终 APK 验证仍在进行中，以构建日志与随后更新的记录为准。
 
-构建脚本成功后，outputs 应包含两个 debug APK、`build-mvp.log`、`apk-sha256.txt`、`native-provenance.json`。仅在 Gradle、签名、权限与占位检测全部成功后复制 APK。测试报告在 `app/build/reports/tests/testDebugUnitTest/`。本机过程状态另外写入仓库同级 `work/build-status.txt`。
+构建脚本成功后，outputs 应包含两个 debug APK、`build-mvp.log`、`apk-sha256.txt`、`native-provenance.json`。仅在 Gradle、签名、zipalign、权限、原生库字节 SHA 与占位检测全部成功后复制 APK。测试报告在 `app/build/reports/tests/testDebugUnitTest/`。本机过程状态另外写入仓库同级 `work/build-status.txt`。
 
 `adb devices -l` 当前为空。仅发现 Wear OS AVD 配置，没有可用的已运行手机模拟器；没有安装或启动本次 APK，也没有验证系统 IME 切换、实际 Rime 部署、候选上屏、隐私输入或目标设备兼容性。取得 APK 后仍需真机/手机模拟器端到端验证。

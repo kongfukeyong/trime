@@ -126,9 +126,14 @@ adb shell ime set com.osfans.trime.debug/com.osfans.trime.ime.core.TrimeInputMet
 
 ## 源码基线与远程 Fork
 
-本地 `mvp/auto-language` 分支来自上述固定版本源码归档，保留上游许可证与原始子模块 SHA。上游 remote 为 `upstream`。源码归档导入不等同于 GitHub 账号下已经创建了远程 Fork；远程创建与发布状态以交付验证报告为准。
+远程 Fork：[kongfukeyong/trime](https://github.com/kongfukeyong/trime)。实现分支：[mvp/auto-language](https://github.com/kongfukeyong/trime/tree/mvp/auto-language)。该分支直接基于真正的上游 `v3.3.12` 提交，保留上游历史、许可证与子模块 SHA；本地 `origin` 指向 Fork，`upstream` 指向 osfans/trime。
 
-如当前环境无法建立远程 Fork，可在已登录 GitHub CLI 的机器执行 `gh repo fork osfans/trime --clone=false`，在 Fork 中从 `v3.3.12` 新建分支，再应用交付补丁并按资源准备脚本下载大体积资源。不要将万象语言模型等大二进制直接提交到普通 Git 仓库。
+```powershell
+git clone --branch mvp/auto-language https://github.com/kongfukeyong/trime.git
+cd trime
+```
+
+按构建文档准备资源，再运行构建。生成的 `assets/rime/` 已被 Git 忽略，避免把 398 MB 的语法模型提交到普通仓库。固定来源、长度和 SHA-256 由 `wanxiang-resources.lock.json` 管理。GitHub Actions 在同一分支执行资源校验、APK 构建与单元测试；工作流是否通过、APK 是否安装运行，以交付验证报告中的实际证据为准。
 
 上游参考：[Trime](https://github.com/osfans/trime/tree/v3.3.12)、[万象拼音](https://github.com/amzxyz/rime-wanxiang)。
 
